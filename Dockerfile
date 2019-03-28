@@ -11,7 +11,16 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o billing
 
 
 FROM alpine
+# Create non-root user
+RUN adduser -D runner
+# Add AWS config to user
+COPY .aws /home/runner/.aws
+# Set variable enabling loading of the config
+ENV AWS_SDK_LOAD_CONFIG=1
+
 WORKDIR /app
+#copy binaries from build stage
 COPY --from=go_builder build/billing .
 
+USER runner
 CMD ["./billing"]

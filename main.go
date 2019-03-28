@@ -3,19 +3,20 @@ package main
 import (
 	"log"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/costexplorer"
 )
 
 func main() {
 
-	// TODO: Create a custom session config
+	// TODO: Make sure the program reads the config stored at $HOME/.aws/config
+	// (config should be separate from code)
 	// Ref: https://docs.aws.amazon.com/sdk-for-go/api/aws/#Config
-	sess, err := session.NewSession(&aws.Config{Region: aws.String("eu-central-1")})
+	sess, err := session.NewSession()
 	if err != nil {
 		log.Println("Unable to create session", err)
 	}
+	log.Println("region: ", *(sess.Config.Region))
 
 	svc := costexplorer.New(sess)
 
