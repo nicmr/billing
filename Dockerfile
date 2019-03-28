@@ -1,11 +1,17 @@
 FROM golang as go_builder
+
 WORKDIR /build
 
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
 COPY main.go .
-RUN go get -d "github.com/aws/aws-sdk-go/aws"
-RUN CGO_ENABLED=0 GOOS=linux go build -a -o billing
+RUN CGO_ENABLED=0 GOOS=linux go build -o billing
+
 
 FROM alpine
 WORKDIR /app
-COPY --from=go_builder /build/billing .
+COPY --from=go_builder build/billing .
+
 CMD ["./billing"]
