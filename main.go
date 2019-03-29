@@ -9,9 +9,9 @@ import (
 
 func main() {
 
-	// TODO: Make sure the program reads the config stored at $HOME/.aws/config
-	// (config should be separate from code)
-	// Ref: https://docs.aws.amazon.com/sdk-for-go/api/aws/#Config
+	// TODO: Make sure application reads secrets from Credentials File (dev) or IAM Role(production)
+
+	// Create new session and costexplorer client
 	sess, err := session.NewSession()
 	if err != nil {
 		log.Println("Unable to create session", err)
@@ -20,9 +20,7 @@ func main() {
 
 	svc := costexplorer.New(sess)
 
-	// TODO: Modify the input struct to apply filters
-	// Ref: https://docs.aws.amazon.com/sdk-for-go/api/service/costexplorer/#GetCostAndUsageInput
-
+	// TODO: Move date parameters to flags
 	output, err := costsBetween(svc, "2019-03-20", "2019-03-29")
 	if err != nil {
 		log.Println("GetCostAndUsageRequest failed", err)
@@ -30,7 +28,7 @@ func main() {
 
 	log.Println(output.String())
 
-	// TODO: Parse `output` and generate desired logic
+	// TODO: Parse `output` and generate desired output
 }
 
 // costsBetween is an abstraction around the creation of a GetCostAndUsageInput
