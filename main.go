@@ -21,6 +21,7 @@ func main() {
 	svc := costexplorer.New(sess)
 
 	// TODO: Move date parameters to flags
+
 	output, err := costsBetween(svc, "2019-03-20", "2019-03-29")
 	if err != nil {
 		log.Println("GetCostAndUsageRequest failed", err)
@@ -31,13 +32,13 @@ func main() {
 	// TODO: Parse `output` and generate desired output
 }
 
-// costsBetween is an abstraction around the creation of a GetCostAndUsageInput
+// costsBetween returns the a GetCostAndUsageOutput containing the costs created between `start` and `end`.
+// Start and end should be strings of the form "YYYY-MM-DD".
+// This date range is left-inclusive and right-exclusive.
 func costsBetween(costexpl *(costexplorer.CostExplorer), start string, end string) (*costexplorer.GetCostAndUsageOutput, error) {
-	// input := costexplorer.GetCostAndUsageInput{}
-	// interval := (&costexplorer.DateInterval{}).SetStart(start).SetEnd(end)
-	// input.SetTimePeriod(interval)
 	truestring := "true"
 
+	// prepare a GetCostAndUsageInput struct for the request
 	input := (&costexplorer.GetCostAndUsageInput{}).
 		SetTimePeriod((&costexplorer.DateInterval{}).
 			SetStart(start).
