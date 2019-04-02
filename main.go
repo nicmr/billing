@@ -1,66 +1,47 @@
 package main
 
 import (
-	"log"
-
+	"github.com/Altemista/altemista-billing/pkg/query"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/costexplorer"
+	"log"
+	"net/http"
 )
 
-func main() {
+var (
+	// Session is safe for concurrent use after initialization,
+	// as it will not be mutated by the SDK after creation
+	sess = createSessionOrFatal()
+)
 
-	// TODO: Make sure application reads secrets from Credentials File (dev) or IAM Role(production)
-
-	// Create new session and costexplorer client
+func createSessionOrFatal() *(session.Session) {
 	sess, err := session.NewSession()
 	if err != nil {
-		log.Println("Unable to create session", err)
+		log.Fatal("Unable to initialize aws session: ", err)
 	}
-	log.Println("region: ", *(sess.Config.Region))
+	return sess
+}
+
+func costs(w http.ResponseWriter, r *http.Request) {
+	start := r.URL.Query().Get("start")
+	end := r.URL.Query().Get("end")
+
+	log.Println(start, end)
 
 	svc := costexplorer.New(sess)
 
-	// TODO: Move date parameters to flags
-
-	output, err := costsBetween(svc, "2019-03-31", "2019-04-02")
-
-	//yyyy-MM-ddThh:mm:ssZ
-	// output, err := costsBetween(svc, "2019-03-31T00:00:00Z", "2019-04-02T00:00:00Z")
+	// TODO: Validate start and end inputs here, and throw http.StatusBadRequest if doesn't match pattern
+	output, err := query.CostsBetween(svc, start, end)
 
 	if err != nil {
 		log.Println("GetCostAndUsageRequest failed", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	log.Println(output.String())
-
-	// TODO: Parse `output` and generate desired output
+	w.Write([]byte(output.String()))
 }
 
-// costsBetween returns the a GetCostAndUsageOutput containing the costs created between `start` and `end`.
-// Start and end should be strings of the form "YYYY-MM-DD".
-// This date range is left-inclusive and right-exclusive.
-func costsBetween(costexpl *(costexplorer.CostExplorer), start string, end string) (*costexplorer.GetCostAndUsageOutput, error) {
-	// truestring := "true"
-	metrics := "AmortizedCost"
-
-	// prepare a GetCostAndUsageInput struct for the request
-	input := (&costexplorer.GetCostAndUsageInput{}).
-		SetTimePeriod((&costexplorer.DateInterval{}).
-			SetStart(start).
-			SetEnd(end)).
-		SetGranularity("DAILY").
-		// SetFilter((&costexplorer.Expression{}).
-		// 	SetTags((&costexplorer.TagValues{}).
-		// 		SetKey("isUserResource").
-		// 		SetValues([]*string{&truestring}))).
-		SetGroupBy([]*costexplorer.GroupDefinition{(&costexplorer.GroupDefinition{}).
-			SetKey("customerID").
-			SetType("TAG")}).
-		SetMetrics([]*string{&metrics})
-
-	output, err := costexpl.GetCostAndUsage(input)
-	if err != nil {
-		return nil, err
-	}
-	return output, nil
+func main() {
+	http.HandleFunc("/costs", costs)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -7,6 +7,7 @@ COPY go.sum .
 RUN go mod download
 
 COPY main.go .
+COPY pkg ./pkg
 RUN CGO_ENABLED=0 GOOS=linux go build -o billing
 
 

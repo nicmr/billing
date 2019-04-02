@@ -10,6 +10,8 @@ env:
   - secure: UTvj21eouFYTAWYt+Z/jv32HNoYwwUZp6s5nzDfmtoTDzZgzpgGFaOOZwK/ZYMllhBZ/LiS8uV2wfGQcaeiao+E9paB+lj+CLDuvHa2PWTHI1p9FBZoVMX96SpvKlSHDwtfvdrmr9aeyUYUnnakZ7qqQLDBW84PkrwXHeonLpl8yCiT+RsZBcAZQqVGkAjGvXueV+tUdhW9AZW0H75g1qxDxp5sLrRrlhlq0hTVN71GSJmsBs88Mo+7YRet8z4wYAfs6K0m7MdZXTBqxRSI1RGE1Dk0ScNnFwUheVmlVwzdB2bP92JDGasH0tJeb6sjyW71CgurtrsPYfoRRQUa+cVEh10++fPOo2H4rSsgXY5GAudW3IzOWkRG7a3biTmQsMXA2hJNOGIO7cKSY8CUK+kJTbFS2KFeBTnUBXegqP71QbL1KntbYjGc8plTW34T9k8UjN0QzmXul12lyUr2IHSDHdA4MRoJCONGj1yaCcfxCJ97ErGfWfqD/DRFmU9/uxo/+TksS/kPLZhn63UJGBF9mAN//R9iptVp0/97TvvETB3USEFOaxN5cQ90RK6WqrRUjDayNVZuCbbxbIkyJmpYGYxw6t7jiWbRaW60g29KFtuBfV9Bo5oqPZhwB5yUFF4YFxUsaLc4cw7h/Uf7eZISNf35CxoYBWrLn8KVUbfc=
 before_install:
 - docker build -t altemista-billing .
-- docker run -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY altemista-billing
+# Is now a server, docker run does not return anymore
+# requires further testing logic or auto-termination before reenabling the next line
+# - docker run -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY altemista-billing
 script:
 - go test ./...

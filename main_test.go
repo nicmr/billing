@@ -4,6 +4,7 @@ import (
 	"log"
 	"testing"
 
+	"github.com/Altemista/altemista-billing/pkg/query"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/costexplorer"
 )
@@ -15,7 +16,7 @@ func TestCostBetween(t *testing.T) {
 		t.FailNow()
 	}
 	costexpl := costexplorer.New(sess)
-	_, err = costsBetween(costexpl, "2019-03-31", "2019-04-02")
+	_, err = query.CostsBetween(costexpl, "2019-03-31", "2019-04-02")
 	if err != nil {
 		log.Println("costBetween call failed: ", err)
 		t.FailNow()

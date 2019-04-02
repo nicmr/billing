@@ -5,7 +5,7 @@ import "github.com/aws/aws-sdk-go/service/costexplorer"
 // costsBetween returns the a GetCostAndUsageOutput containing the costs created between `start` and `end`.
 // Start and end should be strings of the form "YYYY-MM-DD".
 // This date range is left-inclusive and right-exclusive.
-func costsBetween(costexpl *(costexplorer.CostExplorer), start string, end string) (*costexplorer.GetCostAndUsageOutput, error) {
+func CostsBetween(costexpl *(costexplorer.CostExplorer), start string, end string) (*costexplorer.GetCostAndUsageOutput, error) {
 	// truestring := "true"
 	metrics := "AmortizedCost"
 
