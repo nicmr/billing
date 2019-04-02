@@ -11,6 +11,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o billing
 
 
 FROM alpine
+RUN apk add ca-certificates
 # Create non-root user
 RUN adduser -D runner
 # Add AWS config to user

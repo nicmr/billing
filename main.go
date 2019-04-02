@@ -22,7 +22,11 @@ func main() {
 
 	// TODO: Move date parameters to flags
 
-	output, err := costsBetween(svc, "2019-03-20", "2019-03-29")
+	output, err := costsBetween(svc, "2019-03-31", "2019-04-02")
+
+	//yyyy-MM-ddThh:mm:ssZ
+	// output, err := costsBetween(svc, "2019-03-31T00:00:00Z", "2019-04-02T00:00:00Z")
+
 	if err != nil {
 		log.Println("GetCostAndUsageRequest failed", err)
 	}
@@ -36,19 +40,23 @@ func main() {
 // Start and end should be strings of the form "YYYY-MM-DD".
 // This date range is left-inclusive and right-exclusive.
 func costsBetween(costexpl *(costexplorer.CostExplorer), start string, end string) (*costexplorer.GetCostAndUsageOutput, error) {
-	truestring := "true"
+	// truestring := "true"
+	metrics := "AmortizedCost"
 
 	// prepare a GetCostAndUsageInput struct for the request
 	input := (&costexplorer.GetCostAndUsageInput{}).
 		SetTimePeriod((&costexplorer.DateInterval{}).
 			SetStart(start).
 			SetEnd(end)).
-		SetFilter((&costexplorer.Expression{}).
-			SetTags((&costexplorer.TagValues{}).
-				SetKey("isUserResource").
-				SetValues([]*string{&truestring}))).
+		SetGranularity("DAILY").
+		// SetFilter((&costexplorer.Expression{}).
+		// 	SetTags((&costexplorer.TagValues{}).
+		// 		SetKey("isUserResource").
+		// 		SetValues([]*string{&truestring}))).
 		SetGroupBy([]*costexplorer.GroupDefinition{(&costexplorer.GroupDefinition{}).
-			SetKey("customerID")})
+			SetKey("customerID").
+			SetType("TAG")}).
+		SetMetrics([]*string{&metrics})
 
 	output, err := costexpl.GetCostAndUsage(input)
 	if err != nil {
