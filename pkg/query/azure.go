@@ -6,6 +6,11 @@ import "time"
 type Azure struct {
 }
 
+// NewAzure creates a new Azure struct with default values
+func NewAzure() Azure {
+	return Azure{}
+}
+
 // CostsBetween is a public wrapper around `costsBetween`
 // It adds package-level variables as parameters, forwards the function call and adds a timestamp
 func (Azure) CostsBetween(start string, end string) (CostsQueryResult, error) {

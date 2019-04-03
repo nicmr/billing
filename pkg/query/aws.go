@@ -25,6 +25,11 @@ func createSessionOrFatal() *(session.Session) {
 type AWS struct {
 }
 
+// NewAWS creates a new AWS struct with default values
+func NewAWS() AWS {
+	return AWS{}
+}
+
 // costsBetween returns the a GetCostAndUsageOutput containing the costs created between `start` and `end`.
 // Start and end should be strings of the form "YYYY-MM-DD".
 // This date range is left-inclusive and right-exclusive.

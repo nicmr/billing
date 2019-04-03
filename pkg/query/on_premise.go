@@ -6,6 +6,11 @@ import "time"
 type OnPremise struct {
 }
 
+// NewOnPremise creates a new OnPremise struct with default values
+func NewOnPremise() OnPremise {
+	return OnPremise{}
+}
+
 // CostsBetween is a public wrapper around `costsBetween`
 // It adds package-level variables as parameters, forwards the function call and adds a timestamp
 func (OnPremise) CostsBetween(start string, end string) (CostsQueryResult, error) {

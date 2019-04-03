@@ -15,11 +15,11 @@ func costs(w http.ResponseWriter, r *http.Request) {
 
 	var client query.CostsQuery = query.DefaultClient()
 	if target == "aws" {
-		client = query.AWS{}
+		client = query.NewAWS()
 	} else if target == "azure" {
-		client = query.Azure{}
+		client = query.NewAzure()
 	} else if target == "on-premise" {
-		client = query.OnPremise{}
+		client = query.NewOnPremise()
 	}
 
 	output, err := client.CostsBetween(start, end)
