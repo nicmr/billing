@@ -12,6 +12,14 @@ You can choose to either build a docker image or compile the program manually.
 Docker is recommended for ease of use.
 
 ### 1. Docker
+Create a credentials file with an AWS access tokens at `altemista-billing/aws/credentials` with the following contents:
+```
+[default]
+aws_access_key_id=your_key_id_here
+aws_secret_access_key=your_secret_here
+```
+
+Now build and run the program using docker
 ```shell
 docker build -t $(basename $PWD)
 docker run -p 8080:8080 $(basename $PWD)
