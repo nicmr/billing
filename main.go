@@ -2,43 +2,34 @@ package main
 
 import (
 	"github.com/Altemista/altemista-billing/pkg/query"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/costexplorer"
 	"log"
 	"net/http"
 )
 
-var (
-	// Session is safe for concurrent use after initialization,
-	// as it will not be mutated by the SDK after creation
-	sess = createSessionOrFatal()
-)
-
-func createSessionOrFatal() *(session.Session) {
-	sess, err := session.NewSession()
-	if err != nil {
-		log.Fatal("Unable to initialize aws session: ", err)
-	}
-	return sess
-}
-
 func costs(w http.ResponseWriter, r *http.Request) {
+	target := r.URL.Query().Get("target")
 	start := r.URL.Query().Get("start")
 	end := r.URL.Query().Get("end")
 
-	log.Println(start, end)
+	// TODO: sanitize parameters
 
-	svc := costexplorer.New(sess)
+	var client query.CostsQuery = query.DefaultClient()
+	if target == "aws" {
+		client = query.AWS{}
+	} else if target == "azure" {
+		client = query.Azure{}
+	} else if target == "on-premise" {
+		client = query.OnPremise{}
+	}
 
-	// TODO: Validate start and end inputs here, and throw http.StatusBadRequest if doesn't match pattern
-	output, err := query.CostsBetween(svc, start, end)
+	output, err := client.CostsBetween(start, end)
 
 	if err != nil {
 		log.Println("GetCostAndUsageRequest failed", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	w.Write([]byte(output.String()))
+	w.Write([]byte(output.Response))
 }
 
 func main() {

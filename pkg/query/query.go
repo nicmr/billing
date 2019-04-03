@@ -1,32 +1,24 @@
 package query
 
-import "github.com/aws/aws-sdk-go/service/costexplorer"
+import "time"
 
-// costsBetween returns the a GetCostAndUsageOutput containing the costs created between `start` and `end`.
-// Start and end should be strings of the form "YYYY-MM-DD".
-// This date range is left-inclusive and right-exclusive.
-func CostsBetween(costexpl *(costexplorer.CostExplorer), start string, end string) (*costexplorer.GetCostAndUsageOutput, error) {
-	// truestring := "true"
-	metrics := "AmortizedCost"
+// CostsQuery is an interface that contains the `CostsBetween` method.
+// CostsBetween allows a type to be queried for the cost between two dates
+type CostsQuery interface {
+	CostsBetween(string, string) (CostsQueryResult, error)
+}
 
-	// prepare a GetCostAndUsageInput struct for the request
-	input := (&costexplorer.GetCostAndUsageInput{}).
-		SetTimePeriod((&costexplorer.DateInterval{}).
-			SetStart(start).
-			SetEnd(end)).
-		SetGranularity("DAILY").
-		// SetFilter((&costexplorer.Expression{}).
-		// 	SetTags((&costexplorer.TagValues{}).
-		// 		SetKey("isUserResource").
-		// 		SetValues([]*string{&truestring}))).
-		SetGroupBy([]*costexplorer.GroupDefinition{(&costexplorer.GroupDefinition{}).
-			SetKey("customerID").
-			SetType("TAG")}).
-		SetMetrics([]*string{&metrics})
+// CostsQueryResult contains a Timestamp and Response
+// Timestamp is a timestamp of the moment the query was completed.
+// Response is a string representation for an arbitrary costexplorer query response
+// This implementation is a placeholder, when azure and on_premise support has been added,
+// outputs from the different queried objects will be parsed into a common format
+type CostsQueryResult struct {
+	Timestamp time.Time
+	Response  string
+}
 
-	output, err := costexpl.GetCostAndUsage(input)
-	if err != nil {
-		return nil, err
-	}
-	return output, nil
+// DefaultClient returns a default Type from those implementing CostsQuery
+func DefaultClient() CostsQuery {
+	return AWS{}
 }
