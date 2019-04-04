@@ -21,7 +21,7 @@ aws_secret_access_key=your_secret_here
 
 Now build and run the program using docker
 ```shell
-docker build -t $(basename $PWD)
+docker build -t $(basename $PWD) .
 docker run -p 8080:8080 $(basename $PWD)
 ```
 Then call via curl
