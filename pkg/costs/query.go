@@ -1,4 +1,5 @@
-package query
+// Package query contains the
+package costs
 
 import "time"
 
@@ -12,7 +13,7 @@ type CostsQuery interface {
 // Timestamp is a timestamp of the moment the query was completed.
 // Response is a string representation for an arbitrary costexplorer query response
 // This implementation is a placeholder, when azure and on_premise support has been added,
-// outputs from the different queried objects will be parsed into a common format
+// outputs from the different queried objects will be parsed into a common result format
 type CostsQueryResult struct {
 	Timestamp time.Time
 	Response  string

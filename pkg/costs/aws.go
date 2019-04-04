@@ -1,4 +1,4 @@
-package query
+package costs
 
 import (
 	"github.com/aws/aws-sdk-go/aws/session"

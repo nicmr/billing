@@ -1,25 +1,26 @@
 package main
 
 import (
-	"github.com/Altemista/altemista-billing/pkg/query"
+	"github.com/Altemista/altemista-billing/pkg/costs"
 	"log"
 	"net/http"
 )
 
-func costs(w http.ResponseWriter, r *http.Request) {
+func handleCosts(w http.ResponseWriter, r *http.Request) {
 	target := r.URL.Query().Get("target")
 	start := r.URL.Query().Get("start")
 	end := r.URL.Query().Get("end")
 
 	// TODO: sanitize parameters
 
-	var client query.CostsQuery = query.DefaultClient()
+	var client = costs.DefaultClient()
+
 	if target == "aws" {
-		client = query.NewAWS()
+		client = costs.NewAWS()
 	} else if target == "azure" {
-		client = query.NewAzure()
+		client = costs.NewAzure()
 	} else if target == "on-premise" {
-		client = query.NewOnPremise()
+		client = costs.NewOnPremise()
 	}
 
 	output, err := client.CostsBetween(start, end)
@@ -33,6 +34,6 @@ func costs(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/costs", costs)
+	http.HandleFunc("/costs", handleCosts)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
