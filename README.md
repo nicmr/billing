@@ -51,7 +51,7 @@ https://docs.aws.amazon.com/de_de/sdk-for-go/v1/developer-guide/configuring-sdk.
 Now you can compile the program using Go 1.12+
 ```shell
 go build .
-./altemista-billing
+AWS_SDK_LOAD_CONFIG=1 ./altemista-billing
 ```
 Then call via curl
 ```shell
@@ -59,3 +59,13 @@ curl -X get http://localhost:8080/costs\?start\=2019-03-29\&end\=2019-04-02
 ```
 Or in your webbrowser
 [http://localhost:8080/costs?start=2019-03-29&end=2019-04-02](http://localhost:8080/costs?start=2019-03-29&end=2019-04-02)
+
+## Testing
+
+Automated testing is handled by Travis CI and can be configured in .travis.yml.
+
+If you want to run tests locally, run
+
+```shell
+AWS_SDK_LOAD_CONFIG=1 go test ./...
+```
