@@ -27,8 +27,12 @@ func createSessionOrFatal() *(session.Session) {
 // key, where key is a path-style object key for the buckett.
 // TODO: Specify s3 bucket as additional parameter or as config loaded from a config file?
 func Upload(reader io.Reader, key string) (*(s3manager.UploadOutput), error) {
+	// s3Svc := s3.New(awsSess, aws.NewConfig().WithRegion("eu-central-1"))
+	// uploader := s3manager.NewUploaderWithClient(s3Svc)
 	uploader := s3manager.NewUploader(awsSess)
 	myBucket := "altemista-billing"
+
+	log.Println("trying to upload as key: ", key)
 
 	// Upload the file to S3
 	result, err := uploader.Upload(&s3manager.UploadInput{

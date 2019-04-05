@@ -2,8 +2,10 @@ package main
 
 import (
 	"github.com/Altemista/altemista-billing/pkg/costs"
+	"github.com/Altemista/altemista-billing/pkg/s3store"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func handleCosts(w http.ResponseWriter, r *http.Request) {
@@ -30,6 +32,10 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
+	_, err = s3store.Upload(strings.NewReader(output.Response), "bills/test.log")
+	if err != nil {
+		log.Println("Writing to s3 failed: ", err)
+	}
 	w.Write([]byte(output.Response))
 }
 
