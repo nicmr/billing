@@ -51,7 +51,7 @@ https://docs.aws.amazon.com/de_de/sdk-for-go/v1/developer-guide/configuring-sdk.
 Now you can compile the program using Go 1.12+
 ```shell
 go build .
-./altemista-billing
+AWS_SDK_LOAD_CONFIG=1 ./altemista-billing
 ```
 Then call via curl
 ```shell

@@ -39,5 +39,8 @@ func Upload(reader io.Reader, key string) (*(s3manager.UploadOutput), error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to upload file, %v", err)
 	}
+
+	log.Println("Uploaded as key: ", key)
+
 	return result, nil
 }
