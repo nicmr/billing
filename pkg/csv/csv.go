@@ -1,3 +1,5 @@
+// This package provides functionality to create .csv-files.
+
 package csv
 
 import (
