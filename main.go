@@ -37,7 +37,10 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Writing to s3 failed: ", err)
 	}
-	w.Write([]byte(output.Response))
+
+	//w.Write([]byte(output.Response))
+	w.Header().Set("Content-Disposition", "attachment; filename=costs.csv")
+	w.Write([]byte(output.CsvFileContent))
 }
 
 func main() {

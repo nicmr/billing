@@ -7,8 +7,9 @@ import "time"
 func costsBetweenOnPremise(start string, end string) (APICallResult, error) {
 
 	result := APICallResult{
-		Timestamp: time.Now(),
-		Response:  "not yet implemented for OnPremise",
+		Timestamp:      time.Now(),
+		Response:       "not yet implemented for OnPremise",
+		CsvFileContent: "not yet implemented for OnPremise",
 	}
 
 	return result, nil

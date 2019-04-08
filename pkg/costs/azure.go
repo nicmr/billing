@@ -7,8 +7,9 @@ import "time"
 func costsBetweenAzure(start string, end string) (APICallResult, error) {
 
 	result := APICallResult{
-		Timestamp: time.Now(),
-		Response:  "not yet implemented for Azure",
+		Timestamp:      time.Now(),
+		Response:       "not yet implemented for Azure",
+		CsvFileContent: "not yet implemented for Azure",
 	}
 
 	return result, nil

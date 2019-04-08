@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/Altemista/altemista-billing/pkg/csv"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/costexplorer"
 )
@@ -39,9 +40,9 @@ func costexplorerCall(costexpl *(costexplorer.CostExplorer), start string, end s
 		// 	SetTags((&costexplorer.TagValues{}).
 		// 		SetKey("isUserResource").
 		// 		SetValues([]*string{&truestring}))).
-		SetGroupBy([]*costexplorer.GroupDefinition{(&costexplorer.GroupDefinition{}).
-			SetKey("customerID").
-			SetType("TAG")}).
+		//SetGroupBy([]*costexplorer.GroupDefinition{(&costexplorer.GroupDefinition{}).
+		//	SetKey("customerID").
+		//	SetType("TAG")}).
 		SetMetrics([]*string{&metrics})
 
 	output, err := costexpl.GetCostAndUsage(input)
@@ -60,9 +61,16 @@ func costsBetweenAWS(start string, end string) (APICallResult, error) {
 		return APICallResult{}, err
 	}
 
+	csvEntries := make([]csv.CsvEntry, len(output.ResultsByTime))
+
+	for index, element := range output.ResultsByTime {
+		csvEntries[index] = csv.CsvEntry{*element.TimePeriod.Start, *element.TimePeriod.End, *element.Total["AmortizedCost"].Amount}
+	}
+
 	result := APICallResult{
-		Timestamp: time.Now(),
-		Response:  output.String(),
+		Timestamp:      time.Now(),
+		Response:       output.String(),
+		CsvFileContent: csv.CreateCsv(csvEntries),
 	}
 
 	return result, nil
