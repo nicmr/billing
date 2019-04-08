@@ -14,5 +14,8 @@ before_install:
 # Is now a server, docker run does not return anymore
 # requires further testing logic or auto-termination before reenabling the next line
 # - docker run -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY altemista-billing
+before_script:
+- mkdir -p $HOME/.aws
+- cp .aws/config $HOME/.aws/config
 script:
 - go test ./...
