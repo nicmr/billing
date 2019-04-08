@@ -52,8 +52,8 @@ func costexplorerCall(costexpl *(costexplorer.CostExplorer), start string, end s
 	return output, nil
 }
 
-// CostsBetweenAWS returns
-// It adds package-level variables as parameters, forwards the function call and adds a timestamp
+// CostsBetweenAWS call costexplorer after adding package-level variables as parameters,
+// then timestamps the result, generates cooresponding csv and returns it as an APICallResult
 func costsBetweenAWS(start string, end string) (APICallResult, error) {
 
 	output, err := costexplorerCall(costexplorer.New(awsSess), start, end)
