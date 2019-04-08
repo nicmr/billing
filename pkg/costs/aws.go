@@ -1,10 +1,12 @@
 package costs
 
 import (
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/costexplorer"
 	"log"
 	"time"
+
+	"github.com/Altemista/altemista-billing/pkg/csv"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/costexplorer"
 )
 
 var (
@@ -47,9 +49,9 @@ func costsBetween(costexpl *(costexplorer.CostExplorer), start string, end strin
 		// 	SetTags((&costexplorer.TagValues{}).
 		// 		SetKey("isUserResource").
 		// 		SetValues([]*string{&truestring}))).
-		SetGroupBy([]*costexplorer.GroupDefinition{(&costexplorer.GroupDefinition{}).
-			SetKey("customerID").
-			SetType("TAG")}).
+		//SetGroupBy([]*costexplorer.GroupDefinition{(&costexplorer.GroupDefinition{}).
+		//	SetKey("customerID").
+		//	SetType("TAG")}).
 		SetMetrics([]*string{&metrics})
 
 	output, err := costexpl.GetCostAndUsage(input)
@@ -68,9 +70,16 @@ func (AWS) CostsBetween(start string, end string) (CostsQueryResult, error) {
 		return CostsQueryResult{}, err
 	}
 
+	csvEntries := make([]csv.CsvEntry, len(output.ResultsByTime))
+
+	for index, element := range output.ResultsByTime {
+		csvEntries[index] = csv.CsvEntry{*element.TimePeriod.Start, *element.TimePeriod.End, *element.Total["AmortizedCost"].Amount}
+	}
+
 	result := CostsQueryResult{
-		Timestamp: time.Now(),
-		Response:  output.String(),
+		Timestamp:      time.Now(),
+		Response:       output.String(),
+		CsvFileContent: csv.CreateCsv(csvEntries),
 	}
 
 	return result, nil
