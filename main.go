@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/Altemista/altemista-billing/pkg/costs"
 	"log"
 	"net/http"
+
+	"github.com/Altemista/altemista-billing/pkg/costs"
 )
 
 func handleCosts(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +31,8 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	w.Write([]byte(output.Response))
+	w.Header().Set("Content-Disposition", "attachment; filename=costs.csv")
+	w.Write([]byte(output.CsvFileContent))
 }
 
 func main() {

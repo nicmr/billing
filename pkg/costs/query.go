@@ -15,8 +15,9 @@ type CostsQuery interface {
 // This implementation is a placeholder, when azure and on_premise support has been added,
 // outputs from the different queried objects will be parsed into a common result format
 type CostsQueryResult struct {
-	Timestamp time.Time
-	Response  string
+	Timestamp      time.Time
+	Response       string
+	CsvFileContent string
 }
 
 // DefaultClient returns a default Type from those implementing CostsQuery

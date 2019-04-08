@@ -1,11 +1,12 @@
 package costs
 
 import (
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/costexplorer"
-	"github.com/Altemista/altemista-billing/pkg/csv"
 	"log"
 	"time"
+
+	"github.com/Altemista/altemista-billing/pkg/csv"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/costexplorer"
 )
 
 var (
@@ -69,17 +70,16 @@ func (AWS) CostsBetween(start string, end string) (CostsQueryResult, error) {
 		return CostsQueryResult{}, err
 	}
 
-	csvEntries := make([]csv.CsvEntry,len(output.ResultsByTime))
+	csvEntries := make([]csv.CsvEntry, len(output.ResultsByTime))
 
 	for index, element := range output.ResultsByTime {
 		csvEntries[index] = csv.CsvEntry{*element.TimePeriod.Start, *element.TimePeriod.End, *element.Total["AmortizedCost"].Amount}
 	}
 
-	csv.CreateCsv(csvEntries)
-
 	result := CostsQueryResult{
-		Timestamp: time.Now(),
-		Response:  output.String(),
+		Timestamp:      time.Now(),
+		Response:       output.String(),
+		CsvFileContent: csv.CreateCsv(csvEntries),
 	}
 
 	return result, nil

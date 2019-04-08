@@ -16,8 +16,9 @@ func NewOnPremise() OnPremise {
 func (OnPremise) CostsBetween(start string, end string) (CostsQueryResult, error) {
 
 	result := CostsQueryResult{
-		Timestamp: time.Now(),
-		Response:  "not yet implemented for OnPremise",
+		Timestamp:      time.Now(),
+		Response:       "not yet implemented for OnPremise",
+		CsvFileContent: "not yet implemented for OnPremise",
 	}
 
 	return result, nil
