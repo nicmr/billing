@@ -1,10 +1,11 @@
 package costs
 
 import (
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/costexplorer"
 	"log"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/costexplorer"
 )
 
 var (
@@ -21,19 +22,10 @@ func createSessionOrFatal() *(session.Session) {
 	return sess
 }
 
-// AWS is a placeholder struct for managing aws costexplorer calls
-type AWS struct {
-}
-
-// NewAWS creates a new AWS struct with default values
-func NewAWS() AWS {
-	return AWS{}
-}
-
 // costsBetween returns the a GetCostAndUsageOutput containing the costs created between `start` and `end`.
 // Start and end should be strings of the form "YYYY-MM-DD".
 // This date range is left-inclusive and right-exclusive.
-func costsBetween(costexpl *(costexplorer.CostExplorer), start string, end string) (*costexplorer.GetCostAndUsageOutput, error) {
+func costexplorerCall(costexpl *(costexplorer.CostExplorer), start string, end string) (*costexplorer.GetCostAndUsageOutput, error) {
 	// truestring := "true"
 	metrics := "AmortizedCost"
 
@@ -59,16 +51,16 @@ func costsBetween(costexpl *(costexplorer.CostExplorer), start string, end strin
 	return output, nil
 }
 
-// CostsBetween is a public wrapper around `costsBetween`
+// CostsBetweenAWS returns
 // It adds package-level variables as parameters, forwards the function call and adds a timestamp
-func (AWS) CostsBetween(start string, end string) (CostsQueryResult, error) {
+func costsBetweenAWS(start string, end string) (APICallResult, error) {
 
-	output, err := costsBetween(costexplorer.New(awsSess), start, end)
+	output, err := costexplorerCall(costexplorer.New(awsSess), start, end)
 	if err != nil {
-		return CostsQueryResult{}, err
+		return APICallResult{}, err
 	}
 
-	result := CostsQueryResult{
+	result := APICallResult{
 		Timestamp: time.Now(),
 		Response:  output.String(),
 	}
