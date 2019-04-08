@@ -3,7 +3,7 @@ package csv
 import (
 	"bytes"
 	"encoding/csv"
-	"fmt"
+	"log"
 )
 
 type CsvEntry struct {
@@ -18,14 +18,14 @@ func CreateCsv(csvEntries []CsvEntry) string {
 
 	err := writer.Write([]string{"TimePeriodStart", "TimePeriodEnd", "Amount"})
 	if err != nil {
-		fmt.Print(err)
+		log.Fatal("Could not write csv header: ", err)
 	}
 
 	for _, entry := range csvEntries {
 		value := []string{entry.TimePeriodStart, entry.TimePeriodEnd, entry.Amount}
 		err := writer.Write(value)
 		if err != nil {
-			fmt.Print(err)
+			log.Fatal("Could not write csv entry: ", err)
 		}
 	}
 
