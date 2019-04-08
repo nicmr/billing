@@ -38,7 +38,7 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 		log.Println("Writing to s3 failed: ", err)
 	}
 
-	//w.Write([]byte(output.Response))
+	// Tell web browsers to "download" the response as "costs.csv".
 	w.Header().Set("Content-Disposition", "attachment; filename=costs.csv")
 	w.Write([]byte(output.CsvFileContent))
 }

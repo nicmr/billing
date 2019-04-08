@@ -72,6 +72,7 @@ func (AWS) CostsBetween(start string, end string) (CostsQueryResult, error) {
 
 	csvEntries := make([]csv.CsvEntry, len(output.ResultsByTime))
 
+	// Retrieve the required information for csvEntries from the output.
 	for index, element := range output.ResultsByTime {
 		csvEntries[index] = csv.CsvEntry{*element.TimePeriod.Start, *element.TimePeriod.End, *element.Total["AmortizedCost"].Amount}
 	}
