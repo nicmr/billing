@@ -16,17 +16,17 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: sanitize parameters
 
-	var client = costs.DefaultClient()
+	var costapi = costs.Default()
 
 	if target == "aws" {
-		client = costs.NewAWS()
+		costapi = costs.AWS()
 	} else if target == "azure" {
-		client = costs.NewAzure()
+		costapi = costs.Azure()
 	} else if target == "on-premise" {
-		client = costs.NewOnPremise()
+		costapi = costs.OnPremise()
 	}
 
-	output, err := client.CostsBetween(start, end)
+	output, err := costapi(start, end)
 
 	if err != nil {
 		log.Println("GetCostAndUsageRequest failed", err)
