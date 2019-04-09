@@ -17,7 +17,7 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 	startStr := r.URL.Query().Get("start")
 	endStr := r.URL.Query().Get("end")
 
-	// sanitize startStr and endStr
+	// validate startStr and endStr
 	const iso8601 = "2006-01-02"
 	start, err := time.Parse(iso8601, startStr)
 	if err != nil {
