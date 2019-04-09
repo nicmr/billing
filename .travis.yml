@@ -21,7 +21,7 @@ before_script:
 script:
 - go test ./...
 before_deploy:
-- docker build -t $DOCKER_REPO:$TRAVIS_COMMIT .
+- docker build -t $DOCKER_NS/$DOCKER_REPO:$TRAVIS_COMMIT .
 deploy:
   provider: script
   script: bash scripts/docker_push.sh
