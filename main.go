@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/Altemista/altemista-billing/pkg/costs"
 	"github.com/Altemista/altemista-billing/pkg/s3store"
@@ -13,14 +14,26 @@ import (
 
 func handleCosts(w http.ResponseWriter, r *http.Request) {
 	target := r.URL.Query().Get("target")
-	start, err := sanitizeDate(r.URL.Query().Get("start"))
+	startStr := r.URL.Query().Get("start")
+	endStr := r.URL.Query().Get("end")
+
+	// sanitize startStr and endStr
+	const iso8601 = "2006-01-02"
+	start, err := time.Parse(iso8601, startStr)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("400 Bad Request"))
 		return
 	}
-	end, err := sanitizeDate(r.URL.Query().Get("end"))
+	end, err := time.Parse(iso8601, endStr)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("400 Bad Request"))
+		return
+	}
+	if !end.After(start) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("400 Bad Request"))
 		return
 	}
 
@@ -36,7 +49,7 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 		costapi = costs.OnPremise()
 	}
 
-	output, err := costapi(start, end)
+	output, err := costapi(startStr, endStr)
 
 	if err != nil {
 		log.Println("GetCostAndUsageRequest failed", err)
