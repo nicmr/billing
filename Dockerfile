@@ -16,7 +16,7 @@ RUN apk add ca-certificates
 # Create non-root user
 RUN adduser -D runner
 # Add AWS config to user
-COPY .aws /home/runner/.aws
+COPY .aws/config /home/runner/.aws/config
 # Set variable enabling loading of the config
 ENV AWS_SDK_LOAD_CONFIG=1
 
