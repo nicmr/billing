@@ -8,17 +8,16 @@ import (
 	"log"
 )
 
-// CsvEntry is a struct that holds the costs for a specified period of time.
-type CsvEntry struct {
+// Entry is a struct that holds the costs for a specified period of time.
+type Entry struct {
 	TimePeriodStart string
 	TimePeriodEnd   string
 	Amount          string
 }
 
-// CreateCsv is a function that creates (the content of) a .csv-file containing
-// a header followed by the csvEntries. The content is returned as a string. This
-// function does NOT create an actual file in the file system.
-func CreateCsv(csvEntries []CsvEntry) string {
+// String parses csvEntries and returns a them as a string with .csv-Formatting,
+// i. e. as a csv header followed by the csvEntries.
+func String(csvEntries []Entry) string {
 	csvFileContent := new(bytes.Buffer)
 	writer := csv.NewWriter(csvFileContent)
 

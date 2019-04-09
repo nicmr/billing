@@ -61,17 +61,21 @@ func costsBetweenAWS(start string, end string) (APICallResult, error) {
 		return APICallResult{}, err
 	}
 
-	csvEntries := make([]csv.CsvEntry, len(output.ResultsByTime))
+	csvEntries := make([]csv.Entry, len(output.ResultsByTime))
 
 	// Retrieve the required information for csvEntries from the output.
 	for index, element := range output.ResultsByTime {
-		csvEntries[index] = csv.CsvEntry{*element.TimePeriod.Start, *element.TimePeriod.End, *element.Total["AmortizedCost"].Amount}
+		csvEntries[index] = csv.Entry{
+			TimePeriodStart: *element.TimePeriod.Start,
+			TimePeriodEnd:   *element.TimePeriod.End,
+			Amount:          *element.Total["AmortizedCost"].Amount,
+		}
 	}
 
 	result := APICallResult{
 		Timestamp:      time.Now(),
 		Response:       output.String(),
-		CsvFileContent: csv.CreateCsv(csvEntries),
+		CsvFileContent: csv.String(csvEntries),
 	}
 
 	return result, nil
