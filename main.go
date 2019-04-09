@@ -33,7 +33,7 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	_, err = s3store.Upload(strings.NewReader(output.Response), "bills/test.log")
+	_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), "bills/test_costs.csv")
 	if err != nil {
 		log.Println("Writing to s3 failed: ", err)
 	}
