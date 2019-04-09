@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/Altemista/altemista-billing/pkg/costs"
@@ -11,8 +13,16 @@ import (
 
 func handleCosts(w http.ResponseWriter, r *http.Request) {
 	target := r.URL.Query().Get("target")
-	start := r.URL.Query().Get("start")
-	end := r.URL.Query().Get("end")
+	start, err := sanitizeDate(r.URL.Query().Get("start"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	end, err := sanitizeDate(r.URL.Query().Get("end"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	// TODO: sanitize parameters
 
@@ -31,6 +41,7 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("GetCostAndUsageRequest failed", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), "bills/test_costs.csv")
@@ -41,6 +52,14 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 	// Tell web browsers to "download" the response as "costs.csv".
 	w.Header().Set("Content-Disposition", "attachment; filename=costs.csv")
 	w.Write([]byte(output.CsvFileContent))
+}
+
+func sanitizeDate(s string) (string, error) {
+	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
+	if re.MatchString(s) {
+		return s, nil
+	}
+	return "", errors.New("not a valid date string")
 }
 
 func main() {
