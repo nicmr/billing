@@ -37,8 +37,6 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: sanitize parameters
-
 	var costapi = costs.Default()
 
 	if target == "aws" {
