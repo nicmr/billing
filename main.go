@@ -67,14 +67,6 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(output.CsvFileContent))
 }
 
-func sanitizeDate(s string) (string, error) {
-	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
-	if re.MatchString(s) {
-		return s, nil
-	}
-	return "", errors.New("not a valid date string")
-}
-
 func main() {
 	http.HandleFunc("/costs", handleCosts)
 	log.Fatal(http.ListenAndServe(":8080", nil))
