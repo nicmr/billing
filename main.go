@@ -1,10 +1,8 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"net/http"
-	"regexp"
 	"strings"
 	"time"
 
