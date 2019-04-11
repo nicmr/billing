@@ -38,6 +38,7 @@ aws_secret_access_key=your_secret_here
 
 ### 2A. Build with Docker
 
+Please make sure you have correctly set up authentication as described in `1. Authenticating with AWS`
 
 Now build and run the program using docker
 ```shell
