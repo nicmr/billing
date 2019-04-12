@@ -47,10 +47,10 @@ docker run -p 8080:8080 -v /path/to/your/credentials:/home/runner/.aws/credentia
 ```
 Then call via curl
 ```shell
-curl -X get http://localhost:8080/costs\?start\=2019-03-29\&end\=2019-04-02
+curl -X get http://localhost:8080/costs\?month\=2019-04
 ```
 Or in your webbrowser
-[http://localhost:8080/costs?start=2019-03-29&end=2019-04-02](http://localhost:8080/costs?start=2019-03-29&end=2019-04-02)
+[http://localhost:8080/costs?month=2019-04](http://localhost:8080/costs?month=2019-04)
 
 
 ### 2B. Build manually
@@ -68,10 +68,10 @@ go run .
 ```
 Then call via curl
 ```shell
-curl -X get http://localhost:8080/costs\?start\=2019-03-29\&end\=2019-04-02
+curl -X get http://localhost:8080/costs\?month\=2019-04
 ```
 Or in your webbrowser
-[http://localhost:8080/costs?start=2019-03-29&end=2019-04-02](http://localhost:8080/costs?start=2019-03-29&end=2019-04-02)
+[http://localhost:8080/costs?month=2019-04](http://localhost:8080/costs?month=2019-04)
 
 ## Testing
 
