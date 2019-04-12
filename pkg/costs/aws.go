@@ -35,7 +35,7 @@ func costexplorerCall(costexpl *(costexplorer.CostExplorer), start string, end s
 		SetTimePeriod((&costexplorer.DateInterval{}).
 			SetStart(start).
 			SetEnd(end)).
-		SetGranularity("DAILY").
+		SetGranularity("MONTHLY").
 		// SetFilter((&costexplorer.Expression{}).
 		// 	SetTags((&costexplorer.TagValues{}).
 		// 		SetKey("isUserResource").
