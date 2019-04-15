@@ -20,9 +20,10 @@ func Default() APICall {
 	return AWS()
 }
 
-// APICall is a type representing a function that takes two strings representing the start and end of the queried date range
+// APICall is a type representing a function that takes a string representing the requested month
+// It should be formatted in iso8601, e.g. "2019-04"
 // and returns an APICallResult containing the response from the implemented API
-type APICall func(string, string) (APICallResult, error)
+type APICall func(string) (APICallResult, error)
 
 // AWS returns an APICall func that will execute an AWS Cost Explorer API call and return APICallResult
 func AWS() APICall {

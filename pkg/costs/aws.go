@@ -68,9 +68,14 @@ func maxGroupLen(arr []*costexplorer.ResultByTime) int {
 	return max
 }
 
-// CostsBetweenAWS call costexplorer after adding package-level variables as parameters,
+// costsBetweenAWS calls costexplorer after adding package-level variables as parameters,
 // then timestamps the result, generates cooresponding csv and returns it as an APICallResult
-func costsBetweenAWS(start string, end string) (APICallResult, error) {
+func costsBetweenAWS(month string) (APICallResult, error) {
+	start, end, err := splitIfValid(month)
+	if err != nil {
+		return APICallResult{}, err
+	}
+
 	amortizedCost := "AmortizedCost"
 	metrics := []*string{&amortizedCost}
 
@@ -81,17 +86,17 @@ func costsBetweenAWS(start string, end string) (APICallResult, error) {
 
 	csvEntries := make([]csv.Entry, maxGroupLen(output.ResultsByTime))
 
-	iso8601 := "2006-01-02"
+	iso8601Short := "2006-01"
 	desiredFormat := "2006-Jan"
 
 	// Retrieve the required information for csvEntries from the output.
 	// this implementation only works for a single month
 	element := output.ResultsByTime[0]
-	month, err := time.Parse(iso8601, *element.TimePeriod.Start)
+	m, err := time.Parse(iso8601Short, month)
 	if err != nil {
 		return APICallResult{}, err
 	}
-	monthStr := month.Format(desiredFormat)
+	monthStr := m.Format(desiredFormat)
 	for i, group := range element.Groups {
 		csvEntries[i] = csv.Entry{
 			Month:         monthStr,
@@ -108,4 +113,24 @@ func costsBetweenAWS(start string, end string) (APICallResult, error) {
 	}
 
 	return result, nil
+}
+
+// splitIfValid checks if month is a iso 8601 conforming string,
+// then splits it into the first day of the month and the first day fo the following month
+// These two tasks are combined in one function because it is more efficient, validating it is a side effect of splitting it
+func splitIfValid(month string) (string, string, error) {
+	const iso8601 = "2006-01-02"
+	startstr := month + "-01"
+
+	targetMonth, err := time.Parse(iso8601, startstr)
+	if err != nil {
+		return "", "", err
+	}
+	nextmonth := targetMonth.AddDate(0, 1, 0)
+	y, m, _ := nextmonth.Date()
+	end := time.Date(y, m, 1, 0, 0, 0, 0, time.UTC)
+
+	endstr := end.Format(iso8601)
+	log.Println(startstr, endstr)
+	return startstr, endstr, nil
 }
