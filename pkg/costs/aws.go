@@ -115,7 +115,7 @@ func costsBetweenAWS(month string) (APICallResult, error) {
 	return result, nil
 }
 
-// splitIfValid checks if month is a iso 8601 conforming string,
+// splitIfValid checks if month is an iso 8601 conforming string,
 // then splits it into the first day of the month and the first day fo the following month
 // These two tasks are combined in one function because it is more efficient, validating it is a side effect of splitting it
 func splitIfValid(month string) (string, string, error) {
