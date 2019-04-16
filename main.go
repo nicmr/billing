@@ -72,7 +72,7 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// Parse command line flags
 	var serve *bool = flag.Bool("serve", false, "If set, the program will respond to http requests at :8080 instead of just running once for a specific month")
-	var month *string = flag.String("month", "", "Specifies the month the program should generate billing data for in iso8601 (YYYY-MM). Ignored if serve is set.")
+	var month *string = flag.String("month", "", "Specifies the month in iso8601 (YYYY-MM). Alternatively, 'last' and 'current' can be passed. Ignored if serve is set.")
 	var apiflag *string = flag.String("api", "", "Specifies the API to be queried. Possible values are aws, azure, on-premise")
 	flag.Parse()
 
@@ -98,6 +98,20 @@ func main() {
 			costapi := selectCostAPI(*apiflag)
 
 			// Validate the string and parse into time.Time struct
+			var targetmonth time.Time
+
+			if *month == "current" {
+				//set to current month
+				targetmonth = time.Now()
+			} else if *month == "last" {
+				//set to last month
+				// convert to 1st of month before subtracting to prevent it from breaking on day 28+
+				y, m, _ := time.Now().Date()
+				targetmonth = time.Date(y, m, 1, 0, 0, 0, 0, time.UTC).AddDate(0, -1, 0)
+			} else {
+
+			}
+
 			*month += "-01"
 			targetmonth, err := time.Parse(iso8601, *month)
 			if err != nil {
