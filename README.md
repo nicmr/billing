@@ -6,6 +6,21 @@ AWS billing service for Altemista Cloud
 
 Please read through [CONTRIBUTING.md](/CONTRIBUTING.md) before making any contributions.
 
+## Command line interface
+```
+~ altemista-billing --help
+Usage of altemista-billing:
+    --api string     Specifies the API to be queried. Possible values are aws, azure, on-premise
+    --month string   Specifies the month the program should generate billing data for in iso8601 (YYYY-MM). Ignored if serve is set.
+    --serve          If set, the program will respond to http requests at :8080 instead of just running once for a specific month
+```
+
+## HTTP interface
+enabled if you pass the --serve flag to the application.
+```sh
+localhost:8080/costs/?month=YYYY-MM
+```
+
 ## Local builds
 You can choose to either build a docker image or compile the program manually.
 
