@@ -31,18 +31,36 @@ func selectCostAPI(s string) (costapi costs.APICall) {
 	return
 }
 
+func parseMonth(s string) (time.Time, error) {
+	var parsedMonth time.Time
+	switch s {
+	case "current":
+		parsedMonth = time.Now()
+	case "last":
+		y, m, _ := time.Now().Date()
+		parsedMonth = time.Date(y, m, 1, 0, 0, 0, 0, time.UTC).AddDate(0, -1, 0)
+	default:
+		// try to parse as iso
+		s += "-01"
+		var err error
+		parsedMonth, err = time.Parse(iso8601, s)
+		if err != nil {
+			return time.Time{}, err
+		}
+	}
+	return parsedMonth, nil
+}
+
 func handleCosts(w http.ResponseWriter, r *http.Request) {
 	target := r.URL.Query().Get("target")
 	month := r.URL.Query().Get("month")
 
-	// Validate passed month
-	month += "-01"
-	parsedMonth, err := time.Parse(iso8601, month)
+	// try to parse month
+	parsedMonth, err := parseMonth(month)
 	if err != nil {
 		log.Println("Error parsing passed month argument")
 		w.Write([]byte("Error parsing passed month argument"))
 		w.WriteHeader(http.StatusBadRequest)
-		return
 	}
 
 	// Select appropriate API
@@ -98,29 +116,15 @@ func main() {
 			costapi := selectCostAPI(*apiflag)
 
 			// Validate the string and parse into time.Time struct
-			var targetmonth time.Time
-
-			if *month == "current" {
-				// set to current month
-				targetmonth = time.Now()
-			} else if *month == "last" {
-				// set to last month
-				// convert to 1st of month before subtracting to prevent it from breaking on day 28+
-				y, m, _ := time.Now().Date()
-				targetmonth = time.Date(y, m, 1, 0, 0, 0, 0, time.UTC).AddDate(0, -1, 0)
-			} else {
-				*month += "-01"
-				var err error
-				targetmonth, err = time.Parse(iso8601, *month)
-				if err != nil {
-					log.Println("Error parsing passed month argument")
-					// 22 signifies invalid argument
-					os.Exit(22)
-				}
+			parsedMonth, err := parseMonth(*month)
+			if err != nil {
+				log.Println("Error parsing passed month argument")
+				// 22 signifies invalid argument
+				os.Exit(22)
 			}
 
 			// Execute the request
-			output, err := costapi(targetmonth)
+			output, err := costapi(parsedMonth)
 
 			if err != nil {
 				log.Println("GetCostAndUsageRequest failed", err)
