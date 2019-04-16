@@ -16,6 +16,21 @@ const (
 	iso8601 = "2006-01-02"
 )
 
+func selectCostAPI(s string) (costapi costs.APICall) {
+	costapi = costs.Default()
+	switch s {
+	case "aws":
+		costapi = costs.AWS()
+	case "azure":
+		costapi = costs.Azure()
+	case "on-premise":
+		costapi = costs.OnPremise()
+	default:
+		// stays costs.Default()
+	}
+	return
+}
+
 func handleCosts(w http.ResponseWriter, r *http.Request) {
 	target := r.URL.Query().Get("target")
 	month := r.URL.Query().Get("month")
@@ -31,18 +46,9 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Select appropriate API
-	var costapi = costs.Default()
-	switch target {
-	case "aws":
-		costapi = costs.AWS()
-	case "azure":
-		costapi = costs.Azure()
-	case "on-premise":
-		costapi = costs.OnPremise()
-	default:
-		//stays costs.Default()
-	}
+	var costapi = selectCostAPI(target)
 
+	// Execute the request
 	output, err := costapi(parsedMonth)
 
 	if err != nil {
@@ -89,17 +95,7 @@ func main() {
 		if *month != "" {
 
 			// Select appropriate API
-			costapi := costs.Default()
-			switch *apiflag {
-			case "aws":
-				costapi = costs.AWS()
-			case "azure":
-				costapi = costs.Azure()
-			case "on-premise":
-				costapi = costs.OnPremise()
-			default:
-				// stays costs.Default()
-			}
+			costapi := selectCostAPI(*apiflag)
 
 			// Validate the string and parse into time.Time struct
 			*month += "-01"
@@ -110,6 +106,7 @@ func main() {
 				os.Exit(22)
 			}
 
+			// Execute the request
 			output, err := costapi(targetmonth)
 
 			if err != nil {
