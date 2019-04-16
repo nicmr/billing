@@ -40,11 +40,11 @@ func costexplorerCall(costexpl *(costexplorer.CostExplorer), start string, end s
 		// 		SetKey("isUserResource").
 		// 		SetValues([]*string{&truestring}))).
 		SetGroupBy([]*costexplorer.GroupDefinition{(&costexplorer.GroupDefinition{}).
-			// Key can be AZ, INSTANCE_TYPE,  LEGAL_ENTITY_NAME, LINKED_ACCOUNT, OPERATION, PLATFORM,
-			// PURCHASE_TYPE, SERVICE, TENANCY, and USAGE_TYPE, if type is DIMENSION.
-			// It can be the name of any cost explorer tag, if type is TAG
+			// // Key can be AZ, INSTANCE_TYPE,  LEGAL_ENTITY_NAME, LINKED_ACCOUNT, OPERATION, PLATFORM,
+			// // PURCHASE_TYPE, SERVICE, TENANCY, and USAGE_TYPE, if type is DIMENSION.
+			// // It can be the name of any cost explorer tag, if type is TAG
 			// SetKey("customerID").
-			// Type needs to be either DIMENSION or TAG
+			// // Type needs to be either DIMENSION or TAG
 			// SetType("TAG")}).
 			SetKey("INSTANCE_TYPE").
 			SetType("DIMENSION")}).
