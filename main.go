@@ -101,23 +101,22 @@ func main() {
 			var targetmonth time.Time
 
 			if *month == "current" {
-				//set to current month
+				// set to current month
 				targetmonth = time.Now()
 			} else if *month == "last" {
-				//set to last month
+				// set to last month
 				// convert to 1st of month before subtracting to prevent it from breaking on day 28+
 				y, m, _ := time.Now().Date()
 				targetmonth = time.Date(y, m, 1, 0, 0, 0, 0, time.UTC).AddDate(0, -1, 0)
 			} else {
-
-			}
-
-			*month += "-01"
-			targetmonth, err := time.Parse(iso8601, *month)
-			if err != nil {
-				log.Println("Error parsing passed month argument")
-				// 22 signifies invalid argument
-				os.Exit(22)
+				*month += "-01"
+				var err error
+				targetmonth, err = time.Parse(iso8601, *month)
+				if err != nil {
+					log.Println("Error parsing passed month argument")
+					// 22 signifies invalid argument
+					os.Exit(22)
+				}
 			}
 
 			// Execute the request
