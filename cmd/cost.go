@@ -13,36 +13,26 @@ import (
 
 // createBillCmd represents the createBill command
 var (
-	month         string
-	api           string
-	createBillCmd = &cobra.Command{
-		Use:   "createBill",
-		Short: "Creates billing documents only for the specified month",
-		Long:  `Analyzes Altemista cloud usage and creates billing documents only for the specified month`,
+	month   string
+	api     string
+	costCmd = &cobra.Command{
+		Use:   "cost",
+		Short: "Analyzes costs and creates billing documents for a single month",
+		Long:  `Analyzes Altemista cloud costs and creates billing documents for a single month`,
 		Run: func(cmd *cobra.Command, args []string) {
-			createBill()
+			cost()
 		},
 	}
 )
 
 func init() {
 
-	createBillCmd.Flags().StringVarP(&month, "month", "m", "current", "Specifies the month: current, last, or 'YYYY-MM'")
-	createBillCmd.Flags().StringVar(&api, "api", "aws", "Specifies the API to work with: aws, azure or onpremise")
-	rootCmd.AddCommand(createBillCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// createBillCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// createBillCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	costCmd.Flags().StringVarP(&month, "month", "m", "current", "Specifies the month: current, last, or 'YYYY-MM'")
+	costCmd.Flags().StringVar(&api, "api", "aws", "Specifies the API to work with: aws, azure or onpremise")
+	rootCmd.AddCommand(costCmd)
 }
 
-func createBill() {
+func cost() {
 	// Select appropriate API
 	costapi := parseCostAPI(api)
 

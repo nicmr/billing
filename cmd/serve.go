@@ -18,7 +18,7 @@ var (
 		Short: "serve http requests",
 		Long:  `Serve http requests. Specify the port with --port`,
 		Run: func(cmd *cobra.Command, args []string) {
-			http.HandleFunc("/costs", handleCosts)
+			http.HandleFunc("/cost", handleCosts)
 			log.Printf("Serving on port %v ...", port)
 			log.Fatal(http.ListenAndServe(":"+port, nil))
 		},
