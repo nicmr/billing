@@ -25,4 +25,4 @@ WORKDIR /app
 COPY --from=go_builder build/billing .
 
 USER runner
-CMD ["./billing"]
+CMD ["./billing cost --month current"]

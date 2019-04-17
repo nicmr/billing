@@ -2,33 +2,42 @@
 
 [![Build Status](https://travis-ci.org/Altemista/altemista-billing.svg?branch=master)](https://travis-ci.org/Altemista/altemista-billing)
 
-AWS billing service for Altemista Cloud
+An AWS billing service for Altemista Cloud.
 
-Please read through [CONTRIBUTING.md](/CONTRIBUTING.md) before making any contributions.
+Please read through [Authentication and Config](#authconfig) if you're running the application for the first time.
 
-## Command line interface
+<!-- Please read through [CONTRIBUTING.md](/CONTRIBUTING.md) before making any contributions. -->
+
+## Command line interface <a name="cli"></a>
 ```
-$ altemista-billing --help
-Usage of altemista-billing:
-    --api string     Specifies the API to be queried. Possible values are aws, azure, on-premise
-    --month string   Specifies the month the program should generate billing data for in iso8601 (YYYY-MM). Ignored if serve is set.
-    --serve          If set, the program will respond to http requests at :8080 instead of just running once for a specific month
-```
+Usage:
+  altemista-billing [command]
 
-## HTTP interface
-enabled if you pass the --serve flag to the application.
+Available Commands:
+  cost        Creates billing documents only for the specified month
+  help        Help about any command
+  serve       serve http requests
+
+Flags:
+  -h, --help   help for altemista-billing
+```
+Run `altemista-billing help <sub-command>` for flags and detailed information for each subcommand
+
+
+## HTTP interface <a name="httpinterface"></a>
+enabled if you invoke the serve subcommand.
 ```sh
-localhost:8080/costs/?month=YYYY-MM
+altemista-billing serve -p 8080
+```
+Then send a get request to [localhost:8080/cost/?month=current](localhost:8080/costs/?month=YYYY-MM).
+
+The http API supports the same parameters as the cost CLI subcommand, in the form of get parameters. Run the following command for detailed information.
+
+```sh
+altemista-billing help cost
 ```
 
-## Local builds
-You can choose to either build a docker image or compile the program manually.
-
-Docker is recommended for ease of use.
-
-Before you decide on a build process, make sure your application can authenticate with your AWS subscription.
-
-### 1. Authentication with AWS
+## Authentication and Config <a name="authconfig"></a>
 
 The Application will look for `~/.aws/config` and `~/.aws/credentials` on your machine.
 
@@ -50,25 +59,23 @@ aws_secret_access_key=your_secret_here
 ```
 
 
+## Local builds <a name="builds"></a>
+You can choose to either build a docker image or compile the program manually.
 
-### 2A. Build with Docker
+Before you start to build your project, please follow the steps in [Authentication and Config](#authconfig).
+
+
+### A. Build with Docker <a name="buildsdocker"></a>
 
 Please make sure you have correctly set up authentication as described in `1. Authenticating with AWS`
 
 Now build and run the program using docker
 ```shell
 docker build -t $(basename $PWD) .
-docker run -p 8080:8080 -v /path/to/your/credentials:/home/runner/.aws/credentials $(basename $PWD)
+docker run -v /path/to/your/credentials:/home/runner/.aws/credentials $(basename $PWD)
 ```
-Then call via curl
-```shell
-curl -X get http://localhost:8080/costs\?month\=2019-04
-```
-Or in your webbrowser
-[http://localhost:8080/costs?month=2019-04](http://localhost:8080/costs?month=2019-04)
 
-
-### 2B. Build manually
+### B. Build manually <a name="buildsmanual"></a>
 
 Please make sure you have correctly set up authentication as described in `1. Authenticating with AWS`
 
@@ -79,16 +86,10 @@ Requirements:
 Now you can compile the program using Go 1.12+
 ```zsh
 export AWS_SDK_LOAD_CONFIG=1 #only do this once
-go run .
+go run . createBill month=current
 ```
-Then call via curl
-```shell
-curl -X get http://localhost:8080/costs\?month\=2019-04
-```
-Or in your webbrowser
-[http://localhost:8080/costs?month=2019-04](http://localhost:8080/costs?month=2019-04)
 
-## Testing
+## Testing <a name="testing"></a>
 
 Automated testing is handled by Travis CI and can be configured in .travis.yml.
 
@@ -99,7 +100,7 @@ export AWS_SDK_LOAD_CONFIG=1 #only do this once
 go test ./...
 ```
 
-## Debugging with VS Code
+## Debugging with VS Code <a name="debugging"></a>
 
 1. Make sure you have the official Microsoft Go extension installed and enabled in VS Code and have gone through all the required steps to compile the application manually
 
