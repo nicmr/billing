@@ -8,7 +8,7 @@ Please read through [CONTRIBUTING.md](/CONTRIBUTING.md) before making any contri
 
 ## Command line interface
 ```
-~ altemista-billing --help
+$ altemista-billing --help
 Usage of altemista-billing:
     --api string     Specifies the API to be queried. Possible values are aws, azure, on-premise
     --month string   Specifies the month the program should generate billing data for in iso8601 (YYYY-MM). Ignored if serve is set.

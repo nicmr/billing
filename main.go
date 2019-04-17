@@ -64,7 +64,7 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Select appropriate API
-	var costapi = selectCostAPI(target)
+	costapi := selectCostAPI(target)
 
 	// Execute the request
 	output, err := costapi(parsedMonth)
@@ -92,6 +92,7 @@ func main() {
 	var serve *bool = flag.Bool("serve", false, "If set, the program will respond to http requests at :8080 instead of just running once for a specific month")
 	var month *string = flag.String("month", "", "Specifies the month in iso8601 (YYYY-MM). Alternatively, 'last' and 'current' can be passed. Ignored if serve is set.")
 	var apiflag *string = flag.String("api", "", "Specifies the API to be queried. Possible values are aws, azure, on-premise")
+	var port *string = flag.String("port", "8080", "Specifies the port for --serve.")
 	flag.Parse()
 
 	// Serve on port if serve is set or no flags are passed
@@ -104,10 +105,9 @@ func main() {
 		}
 
 		// set up server
-		port := ":8080"
 		http.HandleFunc("/costs", handleCosts)
-		log.Printf("Serving on %v ...", port)
-		log.Fatal(http.ListenAndServe(port, nil))
+		log.Printf("Serving on %v ...", *port)
+		log.Fatal(http.ListenAndServe(*port, nil))
 
 	} else {
 		if *month != "" {
@@ -132,7 +132,8 @@ func main() {
 			}
 
 			// Upload to S3
-			_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), "bills/test_costs.csv")
+			filename := "bills/test_costs_" + time.Now().Format("2006-01-02_15:04:05") + ".csv"
+			_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), filename)
 			if err != nil {
 				log.Println("Writing to s3 failed: ", err)
 			}

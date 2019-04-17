@@ -58,16 +58,6 @@ func costexplorerCall(costexpl *(costexplorer.CostExplorer), start string, end s
 	return output, nil
 }
 
-func maxGroupLen(arr []*costexplorer.ResultByTime) int {
-	max := 0
-	for _, e := range arr {
-		if max < len(e.Groups) {
-			max = len(e.Groups)
-		}
-	}
-	return max
-}
-
 // costsBetweenAWS calls costexplorer after adding package-level variables as parameters,
 // then timestamps the result, generates cooresponding csv and returns it as an APICallResult
 func costsMonthlyAWS(month time.Time) (APICallResult, error) {
@@ -82,13 +72,15 @@ func costsMonthlyAWS(month time.Time) (APICallResult, error) {
 		return APICallResult{}, err
 	}
 
-	csvEntries := make([]csv.Entry, maxGroupLen(output.ResultsByTime))
+	// reserve space for the queried month
+	csvEntries := make([]csv.Entry, len(output.ResultsByTime[0].Groups))
 
 	desiredFormat := "2006-Jan"
 
 	monthStr := month.Format(desiredFormat)
 
 	// Retrieve the required information for csvEntries from the output.
+	// As we queried only for a single month, we don't have to iterate and simply look at [0]
 	element := output.ResultsByTime[0]
 	for i, group := range element.Groups {
 		csvEntries[i] = csv.Entry{
