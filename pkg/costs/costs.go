@@ -20,21 +20,22 @@ func Default() APICall {
 	return AWS()
 }
 
-// APICall is a type representing a function that takes two strings representing the start and end of the queried date range
+// APICall is a type representing a function that takes a time.Time and returns the AWS costs
+// for the month associated with that time.Time
 // and returns an APICallResult containing the response from the implemented API
-type APICall func(string, string) (APICallResult, error)
+type APICall func(time.Time) (APICallResult, error)
 
 // AWS returns an APICall func that will execute an AWS Cost Explorer API call and return APICallResult
 func AWS() APICall {
-	return costsBetweenAWS
+	return costsMonthlyAWS
 }
 
 // Azure returns an APICall func that will query an Azure Cost Explorer API and return an APICallResult
 func Azure() APICall {
-	return costsBetweenAzure
+	return costsMonthlyAzure
 }
 
 // OnPremise returns an APICall func that will determine the costs associated with the OnPremise Cloud usage in an APICallResult
 func OnPremise() APICall {
-	return costsBetweenOnPremise
+	return costsMonthlyOnPremise
 }
