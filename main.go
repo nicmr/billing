@@ -106,8 +106,8 @@ func main() {
 
 		// set up server
 		http.HandleFunc("/costs", handleCosts)
-		log.Printf("Serving on %v ...", *port)
-		log.Fatal(http.ListenAndServe(*port, nil))
+		log.Printf("Serving on port %v ...", *port)
+		log.Fatal(http.ListenAndServe(":"+*port, nil))
 
 	} else {
 		if *month != "" {
