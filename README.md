@@ -14,7 +14,7 @@ Usage:
   altemista-billing [command]
 
 Available Commands:
-  cost        Create billing documents for a specified month and uploads them to S3
+  invoice     Create invoices for a specified month and uploads them to S3
   help        Help about any command
   serve       Serve http requests, exposing an API similar to that of cost
 
@@ -29,7 +29,7 @@ enabled if you invoke the serve subcommand.
 ```sh
 altemista-billing serve -p 8080
 ```
-Then send a get request to [localhost:8080/cost/?month=current](localhost:8080/costs/?month=YYYY-MM).
+Then send a get request to [localhost:8080/cost/?month=current](localhost:8080/invoice/?month=YYYY-MM).
 
 The http API supports the same parameters as the cost CLI subcommand, in the form of get parameters. Run the following command for detailed information.
 

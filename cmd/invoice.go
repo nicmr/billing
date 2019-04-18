@@ -14,9 +14,9 @@ import (
 var (
 	month string
 	api   string
-	// costCmd represents the createBill command
-	costCmd = &cobra.Command{
-		Use:   "cost",
+	// invoiceCmd represents the createBill command
+	invoiceCmd = &cobra.Command{
+		Use:   "invoice",
 		Short: "Analyzes costs and creates billing documents for a single month",
 		Long:  `Analyzes Altemista cloud costs and creates billing documents for a single month`,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -27,9 +27,9 @@ var (
 
 func init() {
 
-	costCmd.Flags().StringVarP(&month, "month", "m", "current", "Specifies the month: current, last, or 'YYYY-MM'")
-	costCmd.Flags().StringVar(&api, "api", "aws", "Specifies the API to work with: aws, azure or onpremise")
-	rootCmd.AddCommand(costCmd)
+	invoiceCmd.Flags().StringVarP(&month, "month", "m", "current", "Specifies the month: current, last, or 'YYYY-MM'")
+	invoiceCmd.Flags().StringVar(&api, "api", "aws", "Specifies the API to work with: aws, azure or onpremise")
+	rootCmd.AddCommand(invoiceCmd)
 }
 
 func cost() {
