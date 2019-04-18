@@ -10,9 +10,10 @@ import (
 	"github.com/Altemista/altemista-billing/pkg/s3store"
 )
 
-// serveCmd represents the serve command
 var (
-	port     string
+	port string
+
+	// serveCmd represents the serve command
 	serveCmd = &cobra.Command{
 		Use:   "serve",
 		Short: "serve http requests",

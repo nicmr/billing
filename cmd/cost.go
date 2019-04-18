@@ -11,10 +11,10 @@ import (
 	"github.com/Altemista/altemista-billing/pkg/s3store"
 )
 
-// createBillCmd represents the createBill command
 var (
-	month   string
-	api     string
+	month string
+	api   string
+	// costCmd represents the createBill command
 	costCmd = &cobra.Command{
 		Use:   "cost",
 		Short: "Analyzes costs and creates billing documents for a single month",
