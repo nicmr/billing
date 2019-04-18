@@ -16,7 +16,7 @@ var (
 	api     string
 	bucket  string
 	costCmd = &cobra.Command{
-		Use:   "cost",
+		Use:   "invoice",
 		Short: "Analyzes costs and creates billing documents for a single month",
 		Long:  `Analyzes Altemista cloud costs and creates billing documents for a single month`,
 		Run: func(cmd *cobra.Command, args []string) {
