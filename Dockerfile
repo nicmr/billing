@@ -4,10 +4,11 @@ WORKDIR /build
 
 COPY go.mod .
 COPY go.sum .
-RUN go mod download
-
 COPY main.go .
 COPY pkg ./pkg
+COPY cmd ./cmd
+
+RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -o billing
 
 
@@ -25,4 +26,4 @@ WORKDIR /app
 COPY --from=go_builder build/billing .
 
 USER runner
-CMD ["./billing"]
+CMD ["./billing cost --month current"]

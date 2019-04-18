@@ -2,8 +2,7 @@ package costs
 
 import "time"
 
-// CostsBetween is a public wrapper around `costsBetween`
-// It adds package-level variables as parameters, forwards the function call and adds a timestamp
+// costsMonthlyAzure returns the cloud usage costs for the specified month on Azure. Not yet implemented.
 func costsMonthlyAzure(month time.Time) (APICallResult, error) {
 
 	result := APICallResult{
