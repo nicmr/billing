@@ -15,6 +15,7 @@ import (
 var (
 	month   string
 	api     string
+	bucket  string
 	costCmd = &cobra.Command{
 		Use:   "cost",
 		Short: "Analyzes costs and creates billing documents for a single month",
@@ -29,6 +30,10 @@ func init() {
 
 	costCmd.Flags().StringVarP(&month, "month", "m", "current", "Specifies the month: current, last, or 'YYYY-MM'")
 	costCmd.Flags().StringVar(&api, "api", "aws", "Specifies the API to work with: aws, azure or onpremise")
+	costCmd.Flags().StringVarP(&bucket, "bucket", "b", "", "S3 bucket for output documents (required) ")
+
+	costCmd.MarkFlagRequired("bucket")
+
 	rootCmd.AddCommand(costCmd)
 }
 
@@ -53,8 +58,7 @@ func cost() {
 	}
 
 	// Upload to S3
-	filename := "bills/test_costs_" + time.Now().Format("2006-01-02_15:04:05") + ".csv"
-	_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), filename)
+	_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), bucket, "bills/cost", ".csv", true)
 	if err != nil {
 		log.Println("Writing to s3 failed: ", err)
 	}
