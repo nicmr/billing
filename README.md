@@ -14,9 +14,9 @@ Usage:
   altemista-billing [command]
 
 Available Commands:
-  cost        Creates billing documents only for the specified month
+  cost        Create billing documents for a specified month and uploads them to S3
   help        Help about any command
-  serve       serve http requests
+  serve       Serve http requests, exposing an API similar to that of cost
 
 Flags:
   -h, --help   help for altemista-billing
