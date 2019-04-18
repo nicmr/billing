@@ -10,12 +10,12 @@ import (
 	"github.com/Altemista/altemista-billing/pkg/s3store"
 )
 
-// createBillCmd represents the createBill command
 var (
-	month   string
-	api     string
-	bucket  string
-	costCmd = &cobra.Command{
+	month  string
+	api    string
+	bucket string
+	// invoiceCmd represents the createBill command
+	invoiceCmd = &cobra.Command{
 		Use:   "invoice",
 		Short: "Analyzes costs and creates billing documents for a single month",
 		Long:  `Analyzes Altemista cloud costs and creates billing documents for a single month`,
@@ -27,13 +27,13 @@ var (
 
 func init() {
 
-	costCmd.Flags().StringVarP(&month, "month", "m", "current", "Specifies the month: current, last, or 'YYYY-MM'")
-	costCmd.Flags().StringVar(&api, "api", "aws", "Specifies the API to work with: aws, azure or onpremise")
-	costCmd.Flags().StringVarP(&bucket, "bucket", "b", "", "S3 bucket for output documents (required) ")
+	invoiceCmd.Flags().StringVarP(&month, "month", "m", "current", "Specifies the month: current, last, or 'YYYY-MM'")
+	invoiceCmd.Flags().StringVar(&api, "api", "aws", "Specifies the API to work with: aws, azure or onpremise")
+	invoiceCmd.Flags().StringVarP(&bucket, "bucket", "b", "", "S3 bucket for output documents (required) ")
 
-	costCmd.MarkFlagRequired("bucket")
+	invoiceCmd.MarkFlagRequired("bucket")
 
-	rootCmd.AddCommand(costCmd)
+	rootCmd.AddCommand(invoiceCmd)
 }
 
 func cost() {

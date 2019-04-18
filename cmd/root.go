@@ -9,8 +9,11 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "altemista-billing",
-	Short: "Analyzes Altemista cloud usage and generates billing documents",
-	Long:  "altemista-billing is an application to calculate AWS costs per customer and generates billing documents accordingly.",
+	Short: "Analyzes Altemista cloud usage, generates invoices & uploads to S3",
+	Long: `altemista-billing is an application to
+	- calculate cloud usage costs per Altemista customer
+	- generate invoices accordingly
+	- upload invoices to S3 bucket`,
 }
 
 // Execute lets the cobra root Command parse the subcommands and params
