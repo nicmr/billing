@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/Altemista/altemista-billing/pkg/s3store"
 )
@@ -27,17 +28,27 @@ var (
 
 func init() {
 
+	// month flag & config
 	invoiceCmd.Flags().StringVarP(&month, "month", "m", "current", "Specifies the month: current, last, or 'YYYY-MM'")
+	if err := viper.BindPFlag("month", invoiceCmd.Flags().Lookup("month")); err != nil {
+		log.Fatal("Unable to bind viper to flag:", err)
+	}
+
+	// api flag & config
 	invoiceCmd.Flags().StringVar(&api, "api", "aws", "Specifies the API to work with: aws, azure or onpremise")
+	if err := viper.BindPFlag("api", invoiceCmd.Flags().Lookup("api")); err != nil {
+		log.Fatal("Unable to bind viper to flag:", err)
+	}
+
 	rootCmd.AddCommand(invoiceCmd)
 }
 
 func cost() {
 	// Select appropriate API
-	costapi := parseCostAPI(api)
+	costapi := parseCostAPI(viper.GetString("api"))
 
 	// Validate the string and parse into time.Time struct
-	parsedMonth, err := parseMonth(month)
+	parsedMonth, err := parseMonth(viper.GetString("month"))
 	if err != nil {
 		log.Println("Error parsing passed month argument")
 		// 22 signifies invalid argument
