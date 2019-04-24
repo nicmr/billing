@@ -1,0 +1,16 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: altemista-billing
+spec:
+  schedule: "0 4 1 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: altemista-billing-cron
+            image : altemista/altemista-billing
+            args:
+            - /app/billing cost --month last --api aws --bucket altemista-test
+          restartPolicy: OnFailure

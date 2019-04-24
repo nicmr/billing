@@ -26,4 +26,4 @@ WORKDIR /app
 COPY --from=go_builder build/billing .
 
 USER runner
-CMD ["./billing cost --month current"]
+CMD ["/app/billing", "invoice", "--month", "current", "--bucket", "altemista-billing"]

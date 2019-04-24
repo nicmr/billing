@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -13,8 +12,9 @@ import (
 )
 
 var (
-	month string
-	api   string
+	month  string
+	api    string
+	bucket string
 	// invoiceCmd represents the createBill command
 	invoiceCmd = &cobra.Command{
 		Use:   "invoice",
@@ -37,6 +37,12 @@ func init() {
 	// api flag & config
 	invoiceCmd.Flags().StringVar(&api, "api", "aws", "Specifies the API to work with: aws, azure or onpremise")
 	if err := viper.BindPFlag("api", invoiceCmd.Flags().Lookup("api")); err != nil {
+		log.Fatal("Unable to bind viper to flag:", err)
+	}
+
+	invoiceCmd.Flags().StringVarP(&bucket, "bucket", "b", "", "S3 bucket for output documents (required) ")
+	invoiceCmd.MarkFlagRequired("bucket")
+	if err := viper.BindPFlag("bucket", invoiceCmd.Flags().Lookup("bucket")); err != nil {
 		log.Fatal("Unable to bind viper to flag:", err)
 	}
 
@@ -64,8 +70,8 @@ func cost() {
 	}
 
 	// Upload to S3
-	filename := "bills/test_costs_" + time.Now().Format("2006-01-02_15:04:05") + ".csv"
-	_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), filename)
+	filename := "bills/test_costs_"
+	_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), viper.GetString("bucket"), filename, ".csv", true)
 	if err != nil {
 		log.Println("Writing to s3 failed: ", err)
 	}
