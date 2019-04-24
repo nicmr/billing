@@ -32,8 +32,15 @@ func init() {
 }
 
 func handleCosts(w http.ResponseWriter, r *http.Request) {
-	target := r.URL.Query().Get("target")
+	target := r.URL.Query().Get("api")
 	month := r.URL.Query().Get("month")
+	bucket := r.URL.Query().Get("bucket")
+
+	// bucket is required
+	if bucket == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Parameter missing: bucket."))
+	}
 
 	// try to parse month
 	parsedMonth, err := parseMonth(month)
@@ -56,7 +63,7 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Upload to S3
-	_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), "bills/test_costs.csv")
+	_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), bucket, "bills/cost", ".csv", true)
 	if err != nil {
 		log.Println("Writing to s3 failed: ", err)
 	}

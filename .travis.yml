@@ -15,6 +15,7 @@ env:
   - secure: VFtEnvjlTZXAwQhOegLMqhsAbqVERGtpXz1PVWLMXhZfqQxelKVK/abAKoHlmWLRr7tF1AIBtUEhk8oVbK00LlHyCtICgGuEPW1rYEBVm6ZKDb+r0G6SkB3SsE2ZMgykvZIzH+40rQ5wmcd6rvMNWEwr06ORSXySreJY/LoQdDaXKMVjCUYkRFESQp5ikuhRc0XWitfjBM7JywlBFnEmJre1z6645t1GBDMCgH33WgFxrO74BhnSgLITWCqPg+waPtmo3giIJD/I3Ix2ts/qaj0TuKl+dSrSFGx5Sg3t/Aonq7ITC7Z5i+d6oYkIcBLytK8bhASVoKSvD7FYh4b74nEF8Wv66w/Furp9sJagLHJVvVaXtRgSvLH5ajE5+Ha6KEuPnwOe7iom2y7QvD3+OkXZNiQIGMJQjq3YaEETmeUFs6DgaKoxwlIPyE0eLC+57PKBDE8MsxyxkusEe4NzwNIIGAc9JcDYF9olZJkAVaOaCZEmZEa+ibcW4EqUzWYuOTVFWJZujOooMA4B+exXJxWqW9JJfkmSBhjbL8BOrEQs7HCsgD2bJMG37rFbrmqGSK6crXJ9LHuOLrVL7Sj5zWnQFotmxsnl+Mzc4PNNS8pN/kmzDb0GG43f2OemujaTzGzx3Sxm7ASRMejxRIh+gnB0eh231cSOrOlA4HeNY5Y=
 before_install:
 - docker build -t altemista-billing .
+- docker run -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY  altemista-billing /app/billing invoice --month current --bucket altemista-billing-travis 
 before_script:
 - mkdir -p $HOME/.aws
 - cp .aws/config $HOME/.aws/config

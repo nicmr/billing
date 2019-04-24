@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 
@@ -12,8 +11,9 @@ import (
 )
 
 var (
-	month string
-	api   string
+	month  string
+	api    string
+	bucket string
 	// invoiceCmd represents the createBill command
 	invoiceCmd = &cobra.Command{
 		Use:   "invoice",
@@ -29,6 +29,10 @@ func init() {
 
 	invoiceCmd.Flags().StringVarP(&month, "month", "m", "current", "Specifies the month: current, last, or 'YYYY-MM'")
 	invoiceCmd.Flags().StringVar(&api, "api", "aws", "Specifies the API to work with: aws, azure or onpremise")
+	invoiceCmd.Flags().StringVarP(&bucket, "bucket", "b", "", "S3 bucket for output documents (required) ")
+
+	invoiceCmd.MarkFlagRequired("bucket")
+
 	rootCmd.AddCommand(invoiceCmd)
 }
 
@@ -53,8 +57,8 @@ func cost() {
 	}
 
 	// Upload to S3
-	filename := "bills/test_costs_" + time.Now().Format("2006-01-02_15:04:05") + ".csv"
-	_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), filename)
+	filename := "bills/test_costs_"
+	_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), bucket, filename, ".csv", true)
 	if err != nil {
 		log.Println("Writing to s3 failed: ", err)
 	}

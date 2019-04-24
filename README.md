@@ -86,7 +86,7 @@ Requirements:
 Now you can compile the program using Go 1.12+
 ```zsh
 export AWS_SDK_LOAD_CONFIG=1 #only do this once
-go run . createBill month=current
+go run . createBill --month current --bucket <yourS3bucket>
 ```
 
 ## Testing <a name="testing"></a>
