@@ -4,7 +4,7 @@
 
 An AWS billing service for Altemista Cloud.
 
-Please read through [Authentication and Config](#awsauthconfig) if you're running the application for the first time.
+Please read through [AWS uthentication and Config](#awsauthconfig) if you're running the application for the first time.
 
 <!-- Please read through [CONTRIBUTING.md](/CONTRIBUTING.md) before making any contributions. -->
 
