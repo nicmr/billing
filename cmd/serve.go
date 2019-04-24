@@ -6,12 +6,13 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/Altemista/altemista-billing/pkg/s3store"
 )
 
 var (
-	port string
+	portflag string
 
 	// serveCmd represents the serve command
 	serveCmd = &cobra.Command{
@@ -19,6 +20,7 @@ var (
 		Short: "serve http requests",
 		Long:  `Serve http requests. Specify the port with --port`,
 		Run: func(cmd *cobra.Command, args []string) {
+			port := viper.GetString("port")
 			http.HandleFunc("/invoice", handleCosts)
 			log.Printf("Serving on port %v ...", port)
 			log.Fatal(http.ListenAndServe(":"+port, nil))
@@ -27,7 +29,11 @@ var (
 )
 
 func init() {
-	serveCmd.Flags().StringVarP(&port, "port", "p", "8000", "specifies port to serve on")
+	serveCmd.Flags().StringVarP(&portflag, "port", "p", "8000", "specifies port to serve on")
+	if err := viper.BindPFlag("port", serveCmd.Flags().Lookup("port")); err != nil {
+		log.Fatal("Unable to bind viper to flag:", err)
+	}
+
 	rootCmd.AddCommand(serveCmd)
 }
 
