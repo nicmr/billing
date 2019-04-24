@@ -57,7 +57,8 @@ func cost() {
 	}
 
 	// Upload to S3
-	_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), bucket, "bills/cost", ".csv", true)
+	filename := "bills/test_costs_"
+	_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), bucket, filename, ".csv", true)
 	if err != nil {
 		log.Println("Writing to s3 failed: ", err)
 	}

@@ -27,11 +27,11 @@ func createSessionOrFatal() *(session.Session) {
 
 // Upload uploads bytes from `reader` to S3 bucket `bucket`.
 // The created objects name will be {fileName}{timestamp}?{fileExtension}
-func Upload(reader io.Reader, bucket string, fileName string, fileExtension string, timestamp bool) (*(s3manager.UploadOutput), error) {
+func Upload(reader io.Reader, bucket string, fileName string, fileExtension string, includeTimestamp bool) (*(s3manager.UploadOutput), error) {
 	uploader := s3manager.NewUploader(awsSess)
-	now := time.Now().Format("_2006-01-02_15:04:05")
 	fullKey := fileName
-	if timestamp {
+	if includeTimestamp {
+		now := time.Now().Format("_2006-01-02_15:04:05")
 		fullKey += now
 	}
 	fullKey += fileExtension
