@@ -18,16 +18,16 @@ cache:
   - $HOME/.cache/go-build
   - $HOME/gopath/pkg/mod
 before_install:
-- docker build -t altemista-billing .
+- docker pull $DOCKER_NS/$DOCKER_REPO:latest
+- docker build -t $DOCKER_NS/$DOCKER_REPO:$TRAVIS_COMMIT .
 - docker run -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY  altemista-billing /app/billing invoice --month current --bucket altemista-billing-travis 
 before_script:
 - mkdir -p $HOME/.aws
 - cp .aws/config $HOME/.aws/config
 script:
 - go test ./...
-before_deploy:
-- docker build -t $DOCKER_NS/$DOCKER_REPO:$TRAVIS_COMMIT .
 deploy:
+  skip_cleanup: true
   provider: script
   script: bash scripts/docker_push.sh
   on:
