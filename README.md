@@ -4,7 +4,7 @@
 
 An AWS billing service for Altemista Cloud.
 
-Please read through [AWS uthentication and Config](#awsauthconfig) if you're running the application for the first time.
+Please read through [AWS Authentication and Config](#awsauthconfig) if you're running the application for the first time.
 
 <!-- Please read through [CONTRIBUTING.md](/CONTRIBUTING.md) before making any contributions. -->
 
@@ -45,7 +45,7 @@ All possible command line flags are valid keys:
 ```
 bucket: mybucket
 month: current
-api: aws
+provider: aws
 ```
 The desired subcommand can currently not be specified, and has to be passed on the command line.
 
