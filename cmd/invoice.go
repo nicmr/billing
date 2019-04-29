@@ -41,7 +41,6 @@ func init() {
 	}
 
 	invoiceCmd.Flags().StringVarP(&bucket, "bucket", "b", "", "S3 bucket for output documents (required) ")
-	invoiceCmd.MarkFlagRequired("bucket")
 	if err := viper.BindPFlag("bucket", invoiceCmd.Flags().Lookup("bucket")); err != nil {
 		log.Fatal("Unable to bind viper to flag:", err)
 	}
@@ -50,6 +49,10 @@ func init() {
 }
 
 func cost() {
+	bucket := viper.GetString("bucket")
+	if bucket == "" {
+		log.Fatal("Required --bucket parameter missing. Please supply it via flag or config file.")
+	}
 	// Select appropriate API
 	costapi := parseCostAPI(viper.GetString("api"))
 
