@@ -20,15 +20,19 @@ cache:
   directories:
   - $HOME/.cache/go-build
   - $HOME/gopath/pkg/mod
-before_install:
-- docker pull $DOCKER_NS/$DOCKER_REPO:latest
-- docker build -t $TAG_COMMIT .
-- docker run -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY $TAG_COMMIT /app/billing invoice --month current --bucket altemista-billing-travis 
-before_script:
-- mkdir -p $HOME/.aws
-- cp .aws/config $HOME/.aws/config
+install:
+  - go mod download
+  - mkdir -p $HOME/.aws
+  - cp .aws/config $HOME/.aws/config
+  - docker pull $TAG_LATEST
+
 script:
+- GOOS=linux go build -o altemista-billing
+- docker build -t $TAG_COMMIT . --cache-from $TAG_LATEST
+- docker run -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY $TAG_COMMIT /app/billing invoice --month current --bucket altemista-billing-travis 
+
 - go test ./...
+
 deploy:
   skip_cleanup: true
   provider: script
