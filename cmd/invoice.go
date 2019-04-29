@@ -12,9 +12,9 @@ import (
 )
 
 var (
-	month  string
-	api    string
-	bucket string
+	month    string
+	provider string
+	bucket   string
 	// invoiceCmd represents the createBill command
 	invoiceCmd = &cobra.Command{
 		Use:   "invoice",
@@ -34,9 +34,9 @@ func init() {
 		log.Fatal("Unable to bind viper to flag:", err)
 	}
 
-	// api flag & config
-	invoiceCmd.Flags().StringVar(&api, "api", "aws", "Specifies the API to work with: aws, azure or onpremise")
-	if err := viper.BindPFlag("api", invoiceCmd.Flags().Lookup("api")); err != nil {
+	// provider flag & config
+	invoiceCmd.Flags().StringVar(&provider, "provider", "aws", "Specifies the API to work with: aws, azure or onpremise")
+	if err := viper.BindPFlag("provider", invoiceCmd.Flags().Lookup("provider")); err != nil {
 		log.Fatal("Unable to bind viper to flag:", err)
 	}
 
@@ -54,7 +54,7 @@ func cost() {
 		log.Fatal("Required --bucket parameter missing. Please supply it via flag or config file.")
 	}
 	// Select appropriate API
-	costapi := parseCostAPI(viper.GetString("api"))
+	costapi := parseCostProvider(viper.GetString("provider"))
 
 	// Validate the string and parse into time.Time struct
 	parsedMonth, err := parseMonth(viper.GetString("month"))

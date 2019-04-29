@@ -10,7 +10,7 @@ const (
 	iso8601 = "2006-01-02"
 )
 
-func parseCostAPI(s string) (costapi costs.APICall) {
+func parseCostProvider(s string) (costapi costs.APICall) {
 	costapi = costs.Default()
 	switch s {
 	case "aws":

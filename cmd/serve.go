@@ -38,14 +38,14 @@ func init() {
 }
 
 func handleCosts(w http.ResponseWriter, r *http.Request) {
-	target := r.URL.Query().Get("api")
+	provider := r.URL.Query().Get("provider")
 	month := r.URL.Query().Get("month")
 	bucket := r.URL.Query().Get("bucket")
 
 	// bucket is required
 	if bucket == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Parameter missing: bucket."))
+		w.Write([]byte("Required parameter missing: bucket."))
 	}
 
 	// try to parse month
@@ -57,7 +57,7 @@ func handleCosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Select appropriate API
-	costapi := parseCostAPI(target)
+	costapi := parseCostProvider(provider)
 
 	// Execute the request
 	output, err := costapi(parsedMonth)
