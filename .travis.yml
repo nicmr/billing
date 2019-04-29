@@ -27,7 +27,7 @@ install:
   - docker pull $TAG_LATEST
 
 script:
-- GOOS=linux go build -o altemista-billing
+- GOOS=linux go build
 - docker build -t $TAG_COMMIT . --cache-from $TAG_LATEST
 - docker run -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY $TAG_COMMIT /app/billing invoice --month current --bucket altemista-billing-travis 
 
