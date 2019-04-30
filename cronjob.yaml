@@ -12,5 +12,5 @@ spec:
           - name: altemista-billing-cron
             image : altemista/altemista-billing
             args:
-            - /app/billing cost --month last --api aws --bucket altemista-test
+            - /app/billing invoice --month last --provider aws --bucket altemista-test
           restartPolicy: OnFailure
