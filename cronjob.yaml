@@ -19,5 +19,5 @@ spec:
             - --provider 
             - aws
             - --bucket
-            - altemista-test
+            - altemista-billing
           restartPolicy: OnFailure
