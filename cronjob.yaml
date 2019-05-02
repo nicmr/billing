@@ -14,7 +14,8 @@ spec:
             args:
             - /app/billing
             - invoice 
-            - --month last
+            - --month
+            - last
             - --provider 
             - aws
             - --bucket
