@@ -2,6 +2,7 @@ package costs
 
 import (
 	"log"
+	"strings"
 	"time"
 
 	"github.com/Altemista/altemista-billing/pkg/csv"
@@ -86,7 +87,7 @@ func costsMonthlyAWS(month time.Time) (APICallResult, error) {
 	for i, group := range element.Groups {
 		csvEntries[i] = csv.Entry{
 			Month:         monthStr,
-			ProjectID:     "Not yet implemented",
+			ProjectID:     strings.Replace(*group.Keys[0], "project-number$", "", 1),
 			ContactPerson: "Not yet implemented",
 			Amount:        *group.Metrics[amortizedCost].Amount,
 		}
