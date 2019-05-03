@@ -1,0 +1,36 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: altemista-billing
+spec:
+  schedule: "* 4 1 * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: altemista-billing-container
+            image : altemista/altemista-billing
+            args:
+            - /app/billing
+            - invoice 
+            - --month
+            - last
+            - --provider 
+            - aws
+            - --bucket
+            - altemista-billing
+            volumeMounts:
+            - name: credentials
+              mountPath: "/home/runner/.aws"
+              readOnly: true
+          restartPolicy: OnFailure
+          volumes:
+          - name: credentials
+            secret:
+              secretName: secrets-billing
+              items:
+              - key: credentials
+                path: credentials
+              - key: config
+                path: config
