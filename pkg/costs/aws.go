@@ -26,6 +26,7 @@ func createSessionOrFatal() *(session.Session) {
 // costsBetween returns the a GetCostAndUsageOutput containing the costs created between `start` and `end`.
 // Start and end should be strings of the form "YYYY-MM-DD".
 // This date range is left-inclusive and right-exclusive.
+// It is safer to use the wrapping function costsMonthlyAWS instead to get information about a single month
 func costexplorerCall(costexpl *(costexplorer.CostExplorer), start string, end string, metrics []*string) (*costexplorer.GetCostAndUsageOutput, error) {
 	// truestring := "true"
 
@@ -43,11 +44,11 @@ func costexplorerCall(costexpl *(costexplorer.CostExplorer), start string, end s
 			// // Key can be AZ, INSTANCE_TYPE,  LEGAL_ENTITY_NAME, LINKED_ACCOUNT, OPERATION, PLATFORM,
 			// // PURCHASE_TYPE, SERVICE, TENANCY, and USAGE_TYPE, if type is DIMENSION.
 			// // It can be the name of any cost explorer tag, if type is TAG
-			// SetKey("customerID").
+			SetKey("project-number").
+			// SetKey("INSTANCE_TYPE").
 			// // Type needs to be either DIMENSION or TAG
-			// SetType("TAG")}).
-			SetKey("INSTANCE_TYPE").
-			SetType("DIMENSION")}).
+			SetType("TAG")}).
+		// SetType("DIMENSION")}).
 		SetMetrics(metrics)
 
 	output, err := costexpl.GetCostAndUsage(input)
@@ -101,7 +102,6 @@ func costsMonthlyAWS(month time.Time) (APICallResult, error) {
 }
 
 // splitIntoBounds splits month into the first day of the month and the first day fo the following month
-// These two tasks are combined in one function because it is more efficient, validating it is a side effect of splitting it
 func splitIntoBounds(month time.Time) (string, string) {
 	const iso8601 = "2006-01-02"
 
