@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/Altemista/altemista-billing/pkg/csv"
 	"github.com/Altemista/altemista-billing/pkg/s3store"
 )
 
@@ -15,6 +16,7 @@ var (
 	month    string
 	provider string
 	bucket   string
+	margin   float32
 	// invoiceCmd represents the createBill command
 	invoiceCmd = &cobra.Command{
 		Use:   "invoice",
@@ -45,6 +47,11 @@ func init() {
 		log.Fatal("Unable to bind viper to flag:", err)
 	}
 
+	invoiceCmd.Flags().Float32Var(&margin, "margin", 1.00, "The margin that should be added on top of resource costs as ops compensation")
+	if err := viper.BindPFlag("margin", invoiceCmd.Flags().Lookup("margin")); err != nil {
+		log.Fatal("Unable to bind viper to flag:", err)
+	}
+
 	rootCmd.AddCommand(invoiceCmd)
 }
 
@@ -65,7 +72,8 @@ func cost() {
 	}
 
 	// Execute the request
-	output, err := costapi(parsedMonth)
+	apiResult, err := costapi(parsedMonth)
+	csvString := csv.Marshal(apiResult.CsvEntries)
 
 	if err != nil {
 		log.Println("GetCostAndUsageRequest failed", err)
@@ -74,11 +82,11 @@ func cost() {
 
 	// Upload to S3
 	filename := "bills/test_costs_"
-	_, err = s3store.Upload(strings.NewReader(output.CsvFileContent), viper.GetString("bucket"), filename, ".csv", true)
+	_, err = s3store.Upload(strings.NewReader(csvString), viper.GetString("bucket"), filename, ".csv", true)
 	if err != nil {
 		log.Println("Writing to s3 failed: ", err)
 	}
 
 	log.Println("results:")
-	log.Println(output.CsvFileContent)
+	log.Println(csvString)
 }
