@@ -14,6 +14,8 @@ type Entry struct {
 	ProjectID     string
 	ContactPerson string
 	Amount        string
+	Margin        string
+	Total         string
 }
 
 func (e Entry) stringSlice() []string {
@@ -22,6 +24,8 @@ func (e Entry) stringSlice() []string {
 		e.ProjectID,
 		e.ContactPerson,
 		e.Amount,
+		e.Margin,
+		e.Total,
 	}
 }
 
@@ -30,6 +34,8 @@ var csvHeaders = []string{
 	"ProjectID",
 	"ContactPerson",
 	"Amount",
+	"Margin",
+	"Total",
 }
 
 // Marshal parses csvEntries and returns a them as a string with .csv-Formatting,

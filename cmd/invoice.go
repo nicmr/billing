@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -16,7 +18,7 @@ var (
 	month    string
 	provider string
 	bucket   string
-	margin   float32
+	margin   float64
 	// invoiceCmd represents the createBill command
 	invoiceCmd = &cobra.Command{
 		Use:   "invoice",
@@ -47,7 +49,7 @@ func init() {
 		log.Fatal("Unable to bind viper to flag:", err)
 	}
 
-	invoiceCmd.Flags().Float32Var(&margin, "margin", 1.00, "The margin that should be added on top of resource costs as ops compensation")
+	invoiceCmd.Flags().Float64Var(&margin, "margin", 1.00, "The margin that should be added on top of resource costs as ops compensation")
 	if err := viper.BindPFlag("margin", invoiceCmd.Flags().Lookup("margin")); err != nil {
 		log.Fatal("Unable to bind viper to flag:", err)
 	}
@@ -73,6 +75,21 @@ func cost() {
 
 	// Execute the request
 	apiResult, err := costapi(parsedMonth)
+
+	// Apply the margin
+	for i, entry := range apiResult.CsvEntries {
+		margin := viper.GetFloat64("margin")
+		amount, err := strconv.ParseFloat(entry.Amount, 64)
+		if err != nil {
+			log.Fatal("unable to parse cost value returned by AWS: ", err)
+		}
+		total := amount * margin
+
+		apiResult.CsvEntries[i].Margin = fmt.Sprintf("%v", margin)
+		apiResult.CsvEntries[i].Total = fmt.Sprintf("%v", total)
+	}
+
+	// Marshal csv to string
 	csvString := csv.Marshal(apiResult.CsvEntries)
 
 	if err != nil {
@@ -87,6 +104,5 @@ func cost() {
 		log.Println("Writing to s3 failed: ", err)
 	}
 
-	log.Println("results:")
 	log.Println(csvString)
 }
