@@ -49,7 +49,7 @@ func init() {
 		log.Fatal("Unable to bind viper to flag:", err)
 	}
 
-	invoiceCmd.Flags().Float64Var(&margin, "margin", 1.00, "The margin that should be added on top of resource costs as ops compensation")
+	invoiceCmd.Flags().Float64Var(&margin, "margin", 1.00, "The relative margin that should be added on top of resource costs as ops compensation")
 	if err := viper.BindPFlag("margin", invoiceCmd.Flags().Lookup("margin")); err != nil {
 		log.Fatal("Unable to bind viper to flag:", err)
 	}
@@ -83,7 +83,7 @@ func cost() {
 		if err != nil {
 			log.Fatal("unable to parse cost value returned by AWS: ", err)
 		}
-		total := amount * margin
+		total := amount * (1.0 + margin)
 
 		apiResult.CsvEntries[i].Margin = fmt.Sprintf("%v", margin)
 		apiResult.CsvEntries[i].Total = fmt.Sprintf("%v", total)
