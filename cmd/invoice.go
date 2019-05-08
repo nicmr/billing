@@ -49,7 +49,7 @@ func init() {
 		log.Fatal("Unable to bind viper to flag:", err)
 	}
 
-	invoiceCmd.Flags().Float64Var(&margin, "margin", 1.00, "The relative margin that should be added on top of resource costs as ops compensation")
+	invoiceCmd.Flags().Float64Var(&margin, "margin", 0.00, "The relative margin that should be added on top of resource costs as ops compensation")
 	if err := viper.BindPFlag("margin", invoiceCmd.Flags().Lookup("margin")); err != nil {
 		log.Fatal("Unable to bind viper to flag:", err)
 	}
