@@ -14,11 +14,14 @@ Usage:
   altemista-billing [command]
 
 Available Commands:
-  invoice     Create invoices for a specified month and uploads them to S3
   help        Help about any command
+  invoice     Analyzes costs and creates billing documents for a single month
 
 Flags:
-  -h, --help   help for altemista-billing
+      --config string   supplies the application with the specified config file
+  -h, --help            help for altemista-billing
+
+Use "altemista-billing [command] --help" for more information about a command.
 ```
 Run `altemista-billing help <sub-command>` for flags and detailed information for each subcommand
 
