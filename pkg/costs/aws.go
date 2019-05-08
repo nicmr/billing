@@ -94,9 +94,9 @@ func costsMonthlyAWS(month time.Time) (APICallResult, error) {
 	}
 
 	result := APICallResult{
-		Timestamp:      time.Now(),
-		Response:       output.String(),
-		CsvFileContent: csv.Marshal(csvEntries),
+		Timestamp:  time.Now(),
+		Response:   output.String(),
+		CsvEntries: csvEntries,
 	}
 
 	return result, nil

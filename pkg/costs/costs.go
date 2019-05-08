@@ -2,7 +2,11 @@
 // from the APIs of AWS, Azure and Kubermatic.
 package costs
 
-import "time"
+import (
+	"time"
+
+	"github.com/Altemista/altemista-billing/pkg/csv"
+)
 
 // APICallResult contains a Timestamp and Response
 // Timestamp is a time.Time of the moment the query was completed.
@@ -10,9 +14,9 @@ import "time"
 // CsvFileContent is a string with a csv representation of the most important data returned ny the ApiCall
 // This struct is likely to change a lot during development, so don't rely too much on its internals.
 type APICallResult struct {
-	Timestamp      time.Time
-	Response       string
-	CsvFileContent string
+	Timestamp  time.Time
+	Response   string
+	CsvEntries []csv.Entry
 }
 
 // Default returns a default `APICall`, currently AWS
