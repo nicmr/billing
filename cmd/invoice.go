@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/Altemista/altemista-billing/pkg/costs"
-	"github.com/Altemista/altemista-billing/pkg/csv"
 	"github.com/Altemista/altemista-billing/pkg/s3store"
 )
 
@@ -86,7 +85,7 @@ func cost() {
 	withMargin := costs.ApplyMargin(apiResult, margin)
 
 	// Marshal csv to string
-	csvString := csv.Marshal(withMargin.CsvEntries)
+	csvString := withMargin.ToCsvString()
 
 	// Upload to S3
 	filename := "bills/test_costs_"

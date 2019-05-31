@@ -22,6 +22,11 @@ type APICallResult struct {
 	CsvEntries []csv.Entry
 }
 
+// ToCsvString returns a csv-conformant string representation of apiResult as a
+func (apiResult APICallResult) ToCsvString() string {
+	return csv.Marshal(apiResult.CsvEntries)
+}
+
 // Default returns a default `APICall`, currently AWS
 func Default() APICall {
 	return AWS()
