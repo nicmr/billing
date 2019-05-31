@@ -3,6 +3,9 @@
 package costs
 
 import (
+	"fmt"
+	"log"
+	"strconv"
 	"time"
 
 	"github.com/Altemista/altemista-billing/pkg/csv"
@@ -22,6 +25,21 @@ type APICallResult struct {
 // Default returns a default `APICall`, currently AWS
 func Default() APICall {
 	return AWS()
+}
+
+// ApplyMargin applies a margin to the provdided APICallResult
+func ApplyMargin(apiResult APICallResult, margin float64) APICallResult {
+	for i, entry := range apiResult.CsvEntries {
+		amount, err := strconv.ParseFloat(entry.Amount, 64)
+		if err != nil {
+			log.Fatal("unable to parse cost value in apiResult: ", err)
+		}
+		total := amount * (1.0 + margin)
+
+		apiResult.CsvEntries[i].Margin = fmt.Sprintf("%v", margin)
+		apiResult.CsvEntries[i].Total = fmt.Sprintf("%v", total)
+	}
+	return apiResult
 }
 
 // APICall is a type representing a function that takes a time.Time and returns the AWS costs

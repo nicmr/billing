@@ -1,15 +1,14 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/Altemista/altemista-billing/pkg/costs"
 	"github.com/Altemista/altemista-billing/pkg/csv"
 	"github.com/Altemista/altemista-billing/pkg/s3store"
 )
@@ -58,10 +57,12 @@ func init() {
 }
 
 func cost() {
+	// Get bucket parameter
 	bucket := viper.GetString("bucket")
 	if bucket == "" {
 		log.Fatal("Required --bucket parameter missing. Please supply it via flag or config file.")
 	}
+
 	// Select appropriate API
 	costapi := parseCostProvider(viper.GetString("provider"))
 
@@ -75,27 +76,17 @@ func cost() {
 
 	// Execute the request
 	apiResult, err := costapi(parsedMonth)
-
-	// Apply the margin
-	for i, entry := range apiResult.CsvEntries {
-		margin := viper.GetFloat64("margin")
-		amount, err := strconv.ParseFloat(entry.Amount, 64)
-		if err != nil {
-			log.Fatal("unable to parse cost value returned by AWS: ", err)
-		}
-		total := amount * (1.0 + margin)
-
-		apiResult.CsvEntries[i].Margin = fmt.Sprintf("%v", margin)
-		apiResult.CsvEntries[i].Total = fmt.Sprintf("%v", total)
-	}
-
-	// Marshal csv to string
-	csvString := csv.Marshal(apiResult.CsvEntries)
-
 	if err != nil {
-		log.Println("GetCostAndUsageRequest failed", err)
+		log.Println("costapi request failed", err)
 		os.Exit(1)
 	}
+
+	//Apply the margin
+	margin := viper.GetFloat64("margin")
+	withMargin := costs.ApplyMargin(apiResult, margin)
+
+	// Marshal csv to string
+	csvString := csv.Marshal(withMargin.CsvEntries)
 
 	// Upload to S3
 	filename := "bills/test_costs_"
@@ -104,5 +95,6 @@ func cost() {
 		log.Println("Writing to s3 failed: ", err)
 	}
 
+	// Print generated csv to stdout
 	log.Println(csvString)
 }
