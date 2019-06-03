@@ -5,59 +5,91 @@ package csv
 import (
 	"bytes"
 	"encoding/csv"
+	"errors"
+	"fmt"
 	"log"
+	"reflect"
+	"strconv"
 )
 
-// Entry is a struct that holds the costs for a specified period of time.
-type Entry struct {
-	Month         string
-	ProjectID     string
-	ContactPerson string
-	Amount        string
-	Margin        string
-	Total         string
-}
+// MarshalReflect tries to convert the passed value to csv using reflection.
+// Returns an error if parsing using reflection is not possible.
+func MarshalReflect(genericSlice []interface{}) (string, error) {
 
-func (e Entry) stringSlice() []string {
-	return []string{
-		e.Month,
-		e.ProjectID,
-		e.ContactPerson,
-		e.Amount,
-		e.Margin,
-		e.Total,
-	}
-}
+	// Initialise csv writer
+	content := new(bytes.Buffer)
+	writer := csv.NewWriter(content)
 
-var csvHeaders = []string{
-	"Month",
-	"ProjectID",
-	"ContactPerson",
-	"Amount",
-	"Margin",
-	"Total",
-}
+	// perform type assurances on the first element of the slice
+	t := reflect.TypeOf(genericSlice[0])
+	switch t.Kind() {
+	case reflect.Struct:
 
-// Marshal parses csvEntries and returns a them as a string with .csv-Formatting,
-// i. e. as a csv header followed by the csvEntries.
-func Marshal(csvEntries []Entry) string {
-	csvFileContent := new(bytes.Buffer)
-	writer := csv.NewWriter(csvFileContent)
+		fieldCount := t.NumField()
 
-	err := writer.Write(csvHeaders)
-	if err != nil {
-		log.Fatal("Could not write csv header: ", err)
-	}
+		orderedColumnHeaders := make([]string, fieldCount)
+		orderedFieldNames := make([]string, t.NumField())
 
-	for _, entry := range csvEntries {
-		// Create a []string, the entries will be written comma-seperated by the writer.
-		row := entry.stringSlice()
-		err := writer.Write(row)
-		if err != nil {
-			log.Fatal("Could not write csv entry: ", err)
+		for i := 0; i < fieldCount; i++ {
+			field := t.Field(i)
+
+			// ensure field implements the fmt.Stringer interface(i.e. , the type has a `func (self) String() string`)
+
+			// Approaches inspired by
+			// https://stackoverflow.com/questions/18570391/check-if-struct-implements-a-given-interface
+
+			// Approach 1:
+			_, ok := interface{}(field).(fmt.Stringer)
+			if !ok && field.Type.String() != "string" {
+				return "", errors.New("Provided field does not fulfill fmt.Stringer interface: " + field.Name)
+			}
+
+			// Approach 2:
+			// stringerType := reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
+			// if !field.Type.Implements(stringerType) {
+			// 	return "", errors.New("Provided field does not fulfill fmt.Stringer interface: " + field.Name)
+			// }
+
+			// ensure required field tags are present
+			csvtag := field.Tag.Get("csv")
+			if csvtag == "" {
+				return "", errors.New("Non-empty struct tag 'csv' is required for marshaling struct. (describes desired csv header)")
+			}
+			order := field.Tag.Get("order")
+			if csvtag == "" {
+				return "", errors.New("Non-empty struct tag 'order' is required for marshaling struct. (describes desired csv column order)")
+			}
+			i, err := strconv.Atoi(order)
+			if err != nil {
+				return "", errors.New("Struct tag 'order' is required to be interpretable as an integer")
+			}
+			if i < 0 || i >= fieldCount {
+				return "", errors.New("Values of struct tag 'order' have to be in the range [0, number of fields)")
+			}
+
+			// TODO: validate that i is in range(0, fieldCount) before using as index to avoid out of bounds panic
+
+			orderedColumnHeaders[i] = csvtag
+			orderedFieldNames[i] = field.Name
 		}
-	}
+		// type assurances have been made
 
-	writer.Flush()
-	return (csvFileContent.String())
+		// print header row
+		writer.Write(orderedColumnHeaders)
+
+		// iterate over the slice and generate the csv presentation of each field
+		for _, genericElement := range genericSlice {
+			row := make([]string, fieldCount)
+			for i, name := range orderedFieldNames {
+				field := reflect.ValueOf(genericElement).FieldByName(name)
+				row[i] = field.String()
+			}
+			err := writer.Write(row)
+			if err != nil {
+				log.Fatal("Could not write csv entry: ", err)
+			}
+		}
+		writer.Flush()
+	}
+	return content.String(), nil
 }

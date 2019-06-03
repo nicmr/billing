@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Altemista/altemista-billing/pkg/csv"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/costexplorer"
 )
@@ -75,7 +74,7 @@ func costsMonthlyAWS(month time.Time) (APICallResult, error) {
 	}
 
 	// reserve space for the queried month
-	csvEntries := make([]csv.Entry, len(output.ResultsByTime[0].Groups))
+	entries := make([]Entry, len(output.ResultsByTime[0].Groups))
 
 	desiredFormat := "2006-Jan"
 
@@ -85,7 +84,7 @@ func costsMonthlyAWS(month time.Time) (APICallResult, error) {
 	// As we queried only for a single month, we don't have to iterate and simply look at [0]
 	element := output.ResultsByTime[0]
 	for i, group := range element.Groups {
-		csvEntries[i] = csv.Entry{
+		entries[i] = Entry{
 			Month:         monthStr,
 			ProjectID:     strings.Replace(*group.Keys[0], "project-number$", "", 1),
 			ContactPerson: "Not yet implemented",
@@ -94,9 +93,9 @@ func costsMonthlyAWS(month time.Time) (APICallResult, error) {
 	}
 
 	result := APICallResult{
-		Timestamp:  time.Now(),
-		Response:   output.String(),
-		CsvEntries: csvEntries,
+		Timestamp:      time.Now(),
+		ResponseString: output.String(),
+		Entries:        entries,
 	}
 
 	return result, nil

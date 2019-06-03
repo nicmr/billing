@@ -11,20 +11,43 @@ import (
 	"github.com/Altemista/altemista-billing/pkg/csv"
 )
 
-// APICallResult contains a Timestamp and Response
+// APICallResult contains a Timestamp and ResponseString
 // Timestamp is a time.Time of the moment the query was completed.
-// Response is a string representation for an arbitrary costexplorer query response
+// ResponseString is a string representation for an arbitrary costexplorer query response
 // CsvFileContent is a string with a csv representation of the most important data returned ny the ApiCall
 // This struct is likely to change a lot during development, so don't rely too much on its internals.
 type APICallResult struct {
-	Timestamp  time.Time
-	Response   string
-	CsvEntries []csv.Entry
+	Timestamp      time.Time
+	ResponseString string
+	// CsvEntries     []csv.Entry
+	Entries []Entry
+}
+
+// Entry is a struct that holds the relevant returned information returned by an APICall
+type Entry struct {
+	Month         string `csv:"Month" order:"0"`
+	ProjectID     string `csv:"ProjectID" order:"1"`
+	ContactPerson string `csv:"ContactPerson" order:"2"`
+	Amount        string `csv:"Amount" order:"3"`
+	Margin        string `csv:"Margin" order:"4"`
+	Total         string `csv:"Total" order:"5"`
 }
 
 // ToCsvString returns a csv-conformant string representation of apiResult as a
 func (apiResult APICallResult) ToCsvString() string {
-	return csv.Marshal(apiResult.CsvEntries)
+
+	// convert our entry slice to an interface slice
+	// (unfortunately go doesn't do this for us)
+	slice := make([]interface{}, len(apiResult.Entries))
+	for i, v := range apiResult.Entries {
+		slice[i] = v
+	}
+
+	csvString, err := csv.MarshalReflect(slice)
+	if err != nil {
+		log.Fatal("unable to generate csv: ", err)
+	}
+	return csvString
 }
 
 // Default returns a default `APICall`, currently AWS
@@ -34,15 +57,15 @@ func Default() APICall {
 
 // ApplyMargin applies a margin to the provdided APICallResult
 func ApplyMargin(apiResult APICallResult, margin float64) APICallResult {
-	for i, entry := range apiResult.CsvEntries {
+	for i, entry := range apiResult.Entries {
 		amount, err := strconv.ParseFloat(entry.Amount, 64)
 		if err != nil {
 			log.Fatal("unable to parse cost value in apiResult: ", err)
 		}
 		total := amount * (1.0 + margin)
 
-		apiResult.CsvEntries[i].Margin = fmt.Sprintf("%v", margin)
-		apiResult.CsvEntries[i].Total = fmt.Sprintf("%v", total)
+		apiResult.Entries[i].Margin = fmt.Sprintf("%v", margin)
+		apiResult.Entries[i].Total = fmt.Sprintf("%v", total)
 	}
 	return apiResult
 }
