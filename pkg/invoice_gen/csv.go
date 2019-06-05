@@ -14,7 +14,7 @@ func CSV(genInput GeneratorInput) string {
 	orderedColumnHeaders := []string{
 		"Month",
 		"ProjectID",
-		"ContactPErson",
+		"ContactPerson",
 		"Amount",
 		"Margin",
 		"Total",
