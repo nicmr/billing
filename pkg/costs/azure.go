@@ -5,12 +5,12 @@ import (
 )
 
 // costsMonthlyAzure returns the cloud usage costs for the specified month on Azure. Not yet implemented.
-func costsMonthlyAzure(month time.Time) (APICallResult, error) {
+func costsMonthlyAzure(month time.Time) (apiCallResult, error) {
 
-	result := APICallResult{
+	result := apiCallResult{
 		Timestamp:      time.Now(),
 		ResponseString: "not yet implemented for Azure",
-		Entries:        []Entry{},
+		Entries:        []apiCallResultEntry{},
 	}
 
 	return result, nil

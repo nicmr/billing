@@ -2,6 +2,7 @@ package costs
 
 import (
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -61,7 +62,7 @@ func costexplorerCall(costexpl *(costexplorer.CostExplorer), start string, end s
 
 // costsBetweenAWS calls costexplorer after adding package-level variables as parameters,
 // then timestamps the result, generates cooresponding csv and returns it as an APICallResult
-func costsMonthlyAWS(month time.Time) (APICallResult, error) {
+func costsMonthlyAWS(month time.Time) (apiCallResult, error) {
 
 	amortizedCost := "AmortizedCost"
 	metrics := []*string{&amortizedCost}
@@ -70,29 +71,29 @@ func costsMonthlyAWS(month time.Time) (APICallResult, error) {
 
 	output, err := costexplorerCall(costexplorer.New(awsSess), start, end, metrics)
 	if err != nil {
-		return APICallResult{}, err
+		return apiCallResult{}, err
 	}
 
 	// reserve space for the queried month
-	entries := make([]Entry, len(output.ResultsByTime[0].Groups))
-
-	desiredFormat := "2006-Jan"
-
-	monthStr := month.Format(desiredFormat)
+	entries := make([]apiCallResultEntry, len(output.ResultsByTime[0].Groups))
 
 	// Retrieve the required information for csvEntries from the output.
 	// As we queried only for a single month, we don't have to iterate and simply look at [0]
 	element := output.ResultsByTime[0]
 	for i, group := range element.Groups {
-		entries[i] = Entry{
-			Month:         monthStr,
-			ProjectID:     strings.Replace(*group.Keys[0], "project-number$", "", 1),
-			ContactPerson: "Not yet implemented",
-			Amount:        *group.Metrics[amortizedCost].Amount,
+		amount, err := strconv.ParseFloat(*group.Metrics[amortizedCost].Amount, 64)
+		if err != nil {
+			log.Println("Unable to decode AWS cost amount as float64")
+			return apiCallResult{}, err
+		}
+
+		entries[i] = apiCallResultEntry{
+			ProjectID: strings.Replace(*group.Keys[0], "project-number$", "", 1),
+			Amount:    amount,
 		}
 	}
 
-	result := APICallResult{
+	result := apiCallResult{
 		Timestamp:      time.Now(),
 		ResponseString: output.String(),
 		Entries:        entries,

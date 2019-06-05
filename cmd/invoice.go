@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/Altemista/altemista-billing/pkg/costs"
+	"github.com/Altemista/altemista-billing/pkg/invoice_gen"
 	"github.com/Altemista/altemista-billing/pkg/s3store"
 )
 
@@ -23,7 +24,7 @@ var (
 		Short: "Analyzes costs and creates billing documents for a single month",
 		Long:  `Analyzes Altemista cloud costs and creates billing documents for a single month`,
 		Run: func(cmd *cobra.Command, args []string) {
-			cost()
+			invoice()
 		},
 	}
 )
@@ -42,11 +43,13 @@ func init() {
 		log.Fatal("Unable to bind viper to flag:", err)
 	}
 
+	// bucket flag & config
 	invoiceCmd.Flags().StringVarP(&bucket, "bucket", "b", "", "S3 bucket for output documents (required) ")
 	if err := viper.BindPFlag("bucket", invoiceCmd.Flags().Lookup("bucket")); err != nil {
 		log.Fatal("Unable to bind viper to flag:", err)
 	}
 
+	// margin flag & config
 	invoiceCmd.Flags().Float64Var(&margin, "margin", 0.00, "The relative margin that should be added on top of resource costs as ops compensation")
 	if err := viper.BindPFlag("margin", invoiceCmd.Flags().Lookup("margin")); err != nil {
 		log.Fatal("Unable to bind viper to flag:", err)
@@ -55,7 +58,7 @@ func init() {
 	rootCmd.AddCommand(invoiceCmd)
 }
 
-func cost() {
+func invoice() {
 	// Get bucket parameter
 	bucket := viper.GetString("bucket")
 	if bucket == "" {
@@ -63,9 +66,12 @@ func cost() {
 	}
 
 	// Select appropriate API
-	costapi := parseCostProvider(viper.GetString("provider"))
+	costProvider := parseCostProvider(viper.GetString("provider"))
 
-	// Validate the string and parse into time.Time struct
+	// Retrieve the margin parameter
+	margin := viper.GetFloat64("margin")
+
+	// Validate the month tring by parsing into time.Time struct
 	parsedMonth, err := parseMonth(viper.GetString("month"))
 	if err != nil {
 		log.Println("Error parsing passed month argument")
@@ -74,26 +80,25 @@ func cost() {
 	}
 
 	// Execute the request
-	apiResult, err := costapi(parsedMonth)
+	costsResult, err := costs.CostCalc(costProvider, parsedMonth, margin)
 	if err != nil {
-		log.Println("costapi request failed", err)
+		log.Println("Costcalc request failed", err)
 		os.Exit(1)
 	}
 
-	//Apply the margin
-	margin := viper.GetFloat64("margin")
-	withMargin := costs.ApplyMargin(apiResult, margin)
+	// Convert InvoiceGenInput struct
+	invoiceGenInput := costsResult.ToInvoiceGenInput()
 
-	// Marshal csv to string
-	csvString := withMargin.ToCsvString()
+	// Generate csv
+	csv := invoice_gen.CSV(invoiceGenInput)
 
 	// Upload to S3
 	filename := "bills/test_costs_"
-	_, err = s3store.Upload(strings.NewReader(csvString), viper.GetString("bucket"), filename, ".csv", true)
+	_, err = s3store.Upload(strings.NewReader(csv), viper.GetString("bucket"), filename, ".csv", true)
 	if err != nil {
 		log.Println("Writing to s3 failed: ", err)
 	}
 
 	// Print generated csv to stdout
-	log.Println(csvString)
+	log.Println(csv)
 }

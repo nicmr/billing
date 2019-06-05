@@ -3,89 +3,109 @@
 package costs
 
 import (
-	"fmt"
-	"log"
-	"strconv"
 	"time"
 
-	"github.com/Altemista/altemista-billing/pkg/csv"
+	"github.com/Altemista/altemista-billing/pkg/invoice_gen"
 )
+
+// CostCalcResult is a struct that holds all information exposed via calls to the public interface of CostCalc
+type CostCalcResult struct {
+	Month         time.Time
+	Margin        float64
+	apicallresult apiCallResult
+	Totals        []float64 // index of total corresponds to index of apiCallResult.Entries(?)
+}
+
+// CostCalc calculates the costs in the passed month at the specified provider and calculates the total cost with the specified margin.
+func CostCalc(provider Provider, month time.Time, margin float64) (CostCalcResult, error) {
+	apiresult, err := provider.apicall(month)
+	if err != nil {
+		return CostCalcResult{}, err
+	}
+
+	costcalcresult := CostCalcResult{
+		Month:         month,
+		Margin:        margin,
+		apicallresult: apiresult,
+		Totals:        applyMargin(apiresult.Entries, margin),
+	}
+
+	return costcalcresult, nil
+}
+
+// ToInvoiceGenInput creates a `invoice_gen.GeneratorInput` from `self`
+func (costResult CostCalcResult) ToInvoiceGenInput() invoice_gen.GeneratorInput {
+	length := len(costResult.apicallresult.Entries)
+	entries := make([]invoice_gen.GeneratorEntry, length)
+
+	for i, entry := range costResult.apicallresult.Entries {
+		entries[i] = invoice_gen.GeneratorEntry{
+			Month:         costResult.Month,
+			ProjectID:     entry.ProjectID,
+			ContactPerson: "not yet implemented",
+			Amount:        entry.Amount,
+			Margin:        costResult.Margin,
+		}
+	}
+
+	return invoice_gen.GeneratorInput{entries}
+}
+
+// ApplyMargin applies a margin to the provdided APICallResult
+func applyMargin(entries []apiCallResultEntry, margin float64) []float64 {
+	results := make([]float64, len(entries))
+
+	for i, entry := range entries {
+		total := entry.Amount * (1.0 + margin)
+		results[i] = total
+	}
+	return results
+}
+
+// APICall is a type representing a function that takes a time.Time and returns the AWS costs
+// for the month associated with that time.Time
+// and returns an APICallResult containing the response from the implemented API
+type APICall func(time.Time) (apiCallResult, error)
+
+// Provider wraps the function required to retrieve billing data from a provider, such as AWS or Azure
+type Provider struct {
+	apicall APICall
+}
+
+// Default returns a default `APICall`, currently AWS
+func Default() Provider {
+	return AWS()
+}
+
+// AWS returns a Provider struct to be passed to CostCalc for cost calculation with the AWS Cost Explorer API
+func AWS() Provider {
+	return Provider{costsMonthlyAWS}
+}
+
+// Azure returns a Provider struct to be passed to CostCalc for cost calculation with the Azure Cost Explorer API
+func Azure() Provider {
+	return Provider{costsMonthlyAzure}
+}
+
+// OnPremise returns a Provider struct to be passed to CostCalc for cost calculation with an on-premise solution
+func OnPremise() Provider {
+	return Provider{costsMonthlyOnPremise}
+}
 
 // APICallResult contains a Timestamp and ResponseString
 // Timestamp is a time.Time of the moment the query was completed.
 // ResponseString is a string representation for an arbitrary costexplorer query response
 // CsvFileContent is a string with a csv representation of the most important data returned ny the ApiCall
 // This struct is likely to change a lot during development, so don't rely too much on its internals.
-type APICallResult struct {
+type apiCallResult struct {
 	Timestamp      time.Time
 	ResponseString string
-	// CsvEntries     []csv.Entry
-	Entries []Entry
+	Entries        []apiCallResultEntry
 }
 
-// Entry is a struct that holds the relevant returned information returned by an APICall
-type Entry struct {
-	Month         string `csv:"Month" order:"0"`
-	ProjectID     string `csv:"ProjectID" order:"1"`
-	ContactPerson string `csv:"ContactPerson" order:"2"`
-	Amount        string `csv:"Amount" order:"3"`
-	Margin        string `csv:"Margin" order:"4"`
-	Total         string `csv:"Total" order:"5"`
-}
-
-// ToCsvString returns a csv-conformant string representation of apiResult as a
-func (apiResult APICallResult) ToCsvString() string {
-
-	// convert our entry slice to an interface slice
-	// (unfortunately go doesn't do this for us)
-	slice := make([]interface{}, len(apiResult.Entries))
-	for i, v := range apiResult.Entries {
-		slice[i] = v
-	}
-
-	csvString, err := csv.MarshalReflect(slice)
-	if err != nil {
-		log.Fatal("unable to generate csv: ", err)
-	}
-	return csvString
-}
-
-// Default returns a default `APICall`, currently AWS
-func Default() APICall {
-	return AWS()
-}
-
-// ApplyMargin applies a margin to the provdided APICallResult
-func ApplyMargin(apiResult APICallResult, margin float64) APICallResult {
-	for i, entry := range apiResult.Entries {
-		amount, err := strconv.ParseFloat(entry.Amount, 64)
-		if err != nil {
-			log.Fatal("unable to parse cost value in apiResult: ", err)
-		}
-		total := amount * (1.0 + margin)
-
-		apiResult.Entries[i].Margin = fmt.Sprintf("%v", margin)
-		apiResult.Entries[i].Total = fmt.Sprintf("%v", total)
-	}
-	return apiResult
-}
-
-// APICall is a type representing a function that takes a time.Time and returns the AWS costs
-// for the month associated with that time.Time
-// and returns an APICallResult containing the response from the implemented API
-type APICall func(time.Time) (APICallResult, error)
-
-// AWS returns an APICall func that will execute an AWS Cost Explorer API call and return APICallResult
-func AWS() APICall {
-	return costsMonthlyAWS
-}
-
-// Azure returns an APICall func that will query an Azure Cost Explorer API and return an APICallResult
-func Azure() APICall {
-	return costsMonthlyAzure
-}
-
-// OnPremise returns an APICall func that will determine the costs associated with the OnPremise Cloud usage in an APICallResult
-func OnPremise() APICall {
-	return costsMonthlyOnPremise
+// APICallResultEntry is a struct that holds the relevant returned information of a single entry returned by an APICall
+type apiCallResultEntry struct {
+	ProjectID string
+	Amount    float64
+	Currency  float64
 }
