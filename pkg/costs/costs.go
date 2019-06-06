@@ -39,9 +39,13 @@ func (costResult CostCalcResult) ToInvoiceGenInput() invoicegen.GeneratorInput {
 	entries := make([]invoicegen.GeneratorEntry, length)
 
 	for i, entry := range costResult.apicallresult.Entries {
+		projectid := entry.ProjectID
+		if projectid == "" {
+			projectid = "no Project ID assigned"
+		}
 		entries[i] = invoicegen.GeneratorEntry{
 			Month:         costResult.Month,
-			ProjectID:     entry.ProjectID,
+			ProjectID:     projectid,
 			ContactPerson: "not yet implemented",
 			Amount:        entry.Amount,
 			Margin:        costResult.Margin,
