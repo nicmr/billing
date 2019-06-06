@@ -2,6 +2,9 @@ package invoicegen
 
 import "time"
 
+// DefaultFormat selects the recommended default invoice format generator.
+// Useful if you require no specific format and would like to not have to make changes inn your code once the recommended deafult changes.
+// If you require a specific format, such as CSV, please use the corresponding function
 func DefaultFormat(input GeneratorInput) string {
 	return CSV(input)
 }

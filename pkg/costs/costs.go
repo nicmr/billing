@@ -92,7 +92,7 @@ func OnPremise() Provider {
 	return Provider{apicall: costsMonthlyOnPremise}
 }
 
-// APICallResult contains a Timestamp and ResponseString
+// apiCallResult contains a Timestamp and ResponseString
 // Timestamp is a time.Time of the moment the query was completed.
 // ResponseString is a string representation for an arbitrary costexplorer query response
 // CsvFileContent is a string with a csv representation of the most important data returned ny the ApiCall
@@ -103,9 +103,9 @@ type apiCallResult struct {
 	Entries        []apiCallResultEntry
 }
 
-// APICallResultEntry is a struct that holds the relevant returned information of a single entry returned by an APICall
+// apiCallResultEntry is a struct that holds the relevant returned information of a single entry returned by an APICall
 type apiCallResultEntry struct {
 	ProjectID string
 	Amount    float64
-	Currency  float64
+	Currency  string
 }
