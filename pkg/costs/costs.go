@@ -45,6 +45,7 @@ func (costResult CostCalcResult) ToInvoiceGenInput() invoicegen.GeneratorInput {
 			ContactPerson: "not yet implemented",
 			Amount:        entry.Amount,
 			Margin:        costResult.Margin,
+			Total:         costResult.Totals[i],
 		}
 	}
 
