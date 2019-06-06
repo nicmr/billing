@@ -14,10 +14,14 @@ type GeneratorInput struct {
 	Entries []GeneratorEntry
 }
 
+// NewGeneratorInput returns a GeneratorInput to be passed to the Different methods of the package
+// This is the preferred method of instantiating a struct of this type
 func NewGeneratorInput(entries []GeneratorEntry) GeneratorInput {
 	return GeneratorInput{entries}
 }
 
+// NewGeneratorEntry returns a GeneratorEntry to be used with a GeneratorInput struct.
+// This is the preferred method of instantiating a struct of this type
 func NewGeneratorEntry(month time.Time, projectID string, contactPerson string, amount float64, margin float64, total float64) GeneratorEntry {
 	return GeneratorEntry{
 		Month:         month,
