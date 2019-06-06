@@ -48,7 +48,7 @@ func (costResult CostCalcResult) ToInvoiceGenInput() invoicegen.GeneratorInput {
 		}
 	}
 
-	return invoicegen.GeneratorInput{entries}
+	return invoicegen.GeneratorInput{Entries: entries}
 }
 
 // ApplyMargin applies a margin to the provdided APICallResult
@@ -79,17 +79,17 @@ func Default() Provider {
 
 // AWS returns a Provider struct to be passed to CostCalc for cost calculation with the AWS Cost Explorer API
 func AWS() Provider {
-	return Provider{costsMonthlyAWS}
+	return Provider{apicall: costsMonthlyAWS}
 }
 
 // Azure returns a Provider struct to be passed to CostCalc for cost calculation with the Azure Cost Explorer API
 func Azure() Provider {
-	return Provider{costsMonthlyAzure}
+	return Provider{apicall: costsMonthlyAzure}
 }
 
 // OnPremise returns a Provider struct to be passed to CostCalc for cost calculation with an on-premise solution
 func OnPremise() Provider {
-	return Provider{costsMonthlyOnPremise}
+	return Provider{apicall: costsMonthlyOnPremise}
 }
 
 // APICallResult contains a Timestamp and ResponseString
