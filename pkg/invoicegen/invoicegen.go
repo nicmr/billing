@@ -14,6 +14,21 @@ type GeneratorInput struct {
 	Entries []GeneratorEntry
 }
 
+func NewGeneratorInput(entries []GeneratorEntry) GeneratorInput {
+	return GeneratorInput{entries}
+}
+
+func NewGeneratorEntry(month time.Time, projectID string, contactPerson string, amount float64, margin float64, total float64) GeneratorEntry {
+	return GeneratorEntry{
+		Month:         month,
+		ProjectID:     projectID,
+		ContactPerson: contactPerson,
+		Amount:        amount,
+		Margin:        margin,
+		Total:         total,
+	}
+}
+
 // GeneratorEntry represents a single entry of specific information in the GeneratorInput struct
 // Usually represents a row in 2D based generation targets
 type GeneratorEntry struct {

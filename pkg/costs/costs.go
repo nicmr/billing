@@ -43,17 +43,17 @@ func (costResult CostCalcResult) ToInvoiceGenInput() invoicegen.GeneratorInput {
 		if projectid == "" {
 			projectid = "no Project ID assigned"
 		}
-		entries[i] = invoicegen.GeneratorEntry{
-			Month:         costResult.Month,
-			ProjectID:     projectid,
-			ContactPerson: "not yet implemented",
-			Amount:        entry.Amount,
-			Margin:        costResult.Margin,
-			Total:         costResult.Totals[i],
-		}
+		entries[i] = invoicegen.NewGeneratorEntry(
+			costResult.Month,
+			projectid,
+			"not yet implemented",
+			entry.Amount,
+			costResult.Margin,
+			costResult.Totals[i],
+		)
 	}
 
-	return invoicegen.GeneratorInput{Entries: entries}
+	return invoicegen.NewGeneratorInput(entries)
 }
 
 // ApplyMargin applies a margin to the provdided APICallResult
