@@ -5,7 +5,7 @@ package costs
 import (
 	"time"
 
-	"github.com/Altemista/altemista-billing/pkg/invoice_gen"
+	"github.com/Altemista/altemista-billing/pkg/invoicegen"
 )
 
 // CostCalcResult is a struct that holds all information exposed via calls to the public interface of CostCalc
@@ -33,13 +33,13 @@ func CostCalc(provider Provider, month time.Time, margin float64) (CostCalcResul
 	return costcalcresult, nil
 }
 
-// ToInvoiceGenInput creates a `invoice_gen.GeneratorInput` from `self`
-func (costResult CostCalcResult) ToInvoiceGenInput() invoice_gen.GeneratorInput {
+// ToInvoiceGenInput creates a `invoicegen.GeneratorInput` from a `CostCalcresult`
+func (costResult CostCalcResult) ToInvoiceGenInput() invoicegen.GeneratorInput {
 	length := len(costResult.apicallresult.Entries)
-	entries := make([]invoice_gen.GeneratorEntry, length)
+	entries := make([]invoicegen.GeneratorEntry, length)
 
 	for i, entry := range costResult.apicallresult.Entries {
-		entries[i] = invoice_gen.GeneratorEntry{
+		entries[i] = invoicegen.GeneratorEntry{
 			Month:         costResult.Month,
 			ProjectID:     entry.ProjectID,
 			ContactPerson: "not yet implemented",
@@ -48,7 +48,7 @@ func (costResult CostCalcResult) ToInvoiceGenInput() invoice_gen.GeneratorInput 
 		}
 	}
 
-	return invoice_gen.GeneratorInput{entries}
+	return invoicegen.GeneratorInput{entries}
 }
 
 // ApplyMargin applies a margin to the provdided APICallResult

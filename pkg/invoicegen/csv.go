@@ -1,6 +1,5 @@
 // This package provides functionality to create .csv-files.
-
-package invoice_gen
+package invoicegen
 
 import (
 	"bytes"

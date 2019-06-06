@@ -1,4 +1,4 @@
-package invoice_gen
+package invoicegen
 
 import "time"
 

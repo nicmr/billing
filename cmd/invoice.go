@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/Altemista/altemista-billing/pkg/costs"
-	"github.com/Altemista/altemista-billing/pkg/invoice_gen"
+	"github.com/Altemista/altemista-billing/pkg/invoicegen"
 	"github.com/Altemista/altemista-billing/pkg/s3store"
 )
 
@@ -90,7 +90,7 @@ func invoice() {
 	invoiceGenInput := costsResult.ToInvoiceGenInput()
 
 	// Generate csv
-	csv := invoice_gen.CSV(invoiceGenInput)
+	csv := invoicegen.CSV(invoiceGenInput)
 
 	// Upload to S3
 	filename := "bills/test_costs_"
