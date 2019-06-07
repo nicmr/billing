@@ -5,8 +5,8 @@ import "time"
 // DefaultFormat selects the recommended default invoice format generator.
 // Useful if you require no specific format and would like to not have to make changes inn your code once the recommended deafult changes.
 // If you require a specific format, such as CSV, please use the corresponding function
-func DefaultFormat(input GeneratorInput) string {
-	return CSV(input)
+func DefaultFormat(convertable ConvertableToGeneratorInput) string {
+	return CSV(convertable)
 }
 
 // GeneratorInput contains all information required by the functions of this package
@@ -42,4 +42,10 @@ type GeneratorEntry struct {
 	Amount        float64
 	Margin        float64
 	Total         float64
+}
+
+// ConvertableToGeneratorInput allows you to define a function for converting your structs to `GeneratorInput`s
+// This allows them to be passed directly to the functions in the public interface of this package.
+type ConvertableToGeneratorInput interface {
+	ToInvoiceGenInput() GeneratorInput
 }

@@ -7,8 +7,13 @@ import (
 	"fmt"
 )
 
-// CSV returns a string csv representation of the data supplied with genInput
-func CSV(genInput GeneratorInput) string {
+// CSV returns a string csv representation of any type that implements ConvertableToGeneratorInput
+func CSV(convertable ConvertableToGeneratorInput) string {
+	input := convertable.ToInvoiceGenInput()
+	return csvGen(input)
+}
+
+func csvGen(genInput GeneratorInput) string {
 	// Order should match order of row values below in `orderedRowValues`
 	orderedColumnHeaders := []string{
 		"Month",

@@ -86,11 +86,8 @@ func invoice() {
 		os.Exit(1)
 	}
 
-	// Convert InvoiceGenInput struct
-	invoiceGenInput := costsResult.ToInvoiceGenInput()
-
 	// Generate csv
-	csv := invoicegen.CSV(invoiceGenInput)
+	csv := invoicegen.CSV(costsResult)
 
 	// Upload to S3
 	filename := "bills/test_costs_"
