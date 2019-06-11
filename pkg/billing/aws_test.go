@@ -1,4 +1,4 @@
-package costs
+package billing
 
 import (
 	"log"

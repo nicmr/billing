@@ -1,4 +1,4 @@
-package costs
+package billing
 
 import (
 	"log"
@@ -9,7 +9,7 @@ import (
 func TestCostCalc(t *testing.T) {
 
 	// create a mocked provider
-	testingProvider := Provider{
+	testingProvider := CloudProvider{
 		apicall: func(time.Time) (apiCallResult, error) {
 			result := apiCallResult{
 				Timestamp:      time.Now(),
@@ -36,7 +36,7 @@ func TestCostCalc(t *testing.T) {
 	}
 
 	// Call the function we want to test with the created parameters
-	CostCalc(testingProvider, month, 0.0)
+	CalculateCosts(testingProvider, month, 0.0)
 
 }
 

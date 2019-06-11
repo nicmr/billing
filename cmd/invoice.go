@@ -3,14 +3,13 @@ package cmd
 import (
 	"log"
 	"os"
-	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/Altemista/altemista-billing/pkg/costs"
-	"github.com/Altemista/altemista-billing/pkg/invoicegen"
-	"github.com/Altemista/altemista-billing/pkg/s3store"
+	"github.com/Altemista/altemista-billing/pkg/app"
+	"github.com/Altemista/altemista-billing/pkg/billing"
 )
 
 var (
@@ -79,23 +78,47 @@ func invoice() {
 		os.Exit(22)
 	}
 
-	// Execute the request
-	costsResult, err := costs.CostCalc(costProvider, parsedMonth, margin)
+	// Flag and arg parsing complete, pass to application code
+	err = app.Run(costProvider, parsedMonth, margin, bucket)
 	if err != nil {
-		log.Println("Costcalc request failed", err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
+}
 
-	// Generate csv
-	csv := invoicegen.CSV(costsResult)
+const (
+	iso8601 = "2006-01-02"
+)
 
-	// Upload to S3
-	filename := "bills/test_costs_"
-	_, err = s3store.Upload(strings.NewReader(csv), viper.GetString("bucket"), filename, ".csv", true)
-	if err != nil {
-		log.Println("Writing to s3 failed: ", err)
+func parseCostProvider(s string) (costapi billing.CloudProvider) {
+	switch s {
+	case "aws":
+		costapi = billing.AWS()
+	case "azure":
+		costapi = billing.Azure()
+	case "on-premise":
+		costapi = billing.OnPremise()
+	default:
+		costapi = billing.Default()
 	}
+	return
+}
 
-	// Print generated csv to stdout
-	log.Println(csv)
+func parseMonth(s string) (time.Time, error) {
+	var parsedMonth time.Time
+	switch s {
+	case "current":
+		parsedMonth = time.Now()
+	case "last":
+		y, m, _ := time.Now().Date()
+		parsedMonth = time.Date(y, m, 1, 0, 0, 0, 0, time.UTC).AddDate(0, -1, 0)
+	default:
+		// try to parse as iso
+		s += "-01"
+		var err error
+		parsedMonth, err = time.Parse(iso8601, s)
+		if err != nil {
+			return time.Time{}, err
+		}
+	}
+	return parsedMonth, nil
 }

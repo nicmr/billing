@@ -1,4 +1,4 @@
-package costs
+package billing
 
 import (
 	"log"
@@ -15,6 +15,48 @@ var (
 	// as it will not be mutated by the SDK after creation
 	awsSess = createSessionOrFatal()
 )
+
+// costsBetweenAWS calls costexplorer after adding package-level variables as parameters,
+// then timestamps the result, generates cooresponding csv and returns it as an APICallResult
+func costsMonthlyAWS(month time.Time) (apiCallResult, error) {
+
+	amortizedCost := "AmortizedCost"
+	metrics := []*string{&amortizedCost}
+
+	start, end := splitIntoBounds(month)
+
+	output, err := costexplorerCall(costexplorer.New(awsSess), start, end, metrics)
+	if err != nil {
+		return apiCallResult{}, err
+	}
+
+	// reserve space for the queried month
+	entries := make([]apiCallResultEntry, len(output.ResultsByTime[0].Groups))
+
+	// Retrieve the required information for csvEntries from the output.
+	// As we queried only for a single month, we don't have to iterate and simply look at [0]
+	element := output.ResultsByTime[0]
+	for i, group := range element.Groups {
+		amount, err := strconv.ParseFloat(*group.Metrics[amortizedCost].Amount, 64)
+		if err != nil {
+			log.Println("Unable to decode AWS cost amount as float64")
+			return apiCallResult{}, err
+		}
+
+		entries[i] = apiCallResultEntry{
+			ProjectID: strings.Replace(*group.Keys[0], "project-number$", "", 1),
+			Amount:    amount,
+		}
+	}
+
+	result := apiCallResult{
+		Timestamp:      time.Now(),
+		ResponseString: output.String(),
+		Entries:        entries,
+	}
+
+	return result, nil
+}
 
 func createSessionOrFatal() *(session.Session) {
 	sess, err := session.NewSession()
@@ -58,48 +100,6 @@ func costexplorerCall(costexpl *(costexplorer.CostExplorer), start string, end s
 	}
 	log.Println(output.String())
 	return output, nil
-}
-
-// costsBetweenAWS calls costexplorer after adding package-level variables as parameters,
-// then timestamps the result, generates cooresponding csv and returns it as an APICallResult
-func costsMonthlyAWS(month time.Time) (apiCallResult, error) {
-
-	amortizedCost := "AmortizedCost"
-	metrics := []*string{&amortizedCost}
-
-	start, end := splitIntoBounds(month)
-
-	output, err := costexplorerCall(costexplorer.New(awsSess), start, end, metrics)
-	if err != nil {
-		return apiCallResult{}, err
-	}
-
-	// reserve space for the queried month
-	entries := make([]apiCallResultEntry, len(output.ResultsByTime[0].Groups))
-
-	// Retrieve the required information for csvEntries from the output.
-	// As we queried only for a single month, we don't have to iterate and simply look at [0]
-	element := output.ResultsByTime[0]
-	for i, group := range element.Groups {
-		amount, err := strconv.ParseFloat(*group.Metrics[amortizedCost].Amount, 64)
-		if err != nil {
-			log.Println("Unable to decode AWS cost amount as float64")
-			return apiCallResult{}, err
-		}
-
-		entries[i] = apiCallResultEntry{
-			ProjectID: strings.Replace(*group.Keys[0], "project-number$", "", 1),
-			Amount:    amount,
-		}
-	}
-
-	result := apiCallResult{
-		Timestamp:      time.Now(),
-		ResponseString: output.String(),
-		Entries:        entries,
-	}
-
-	return result, nil
 }
 
 // splitIntoBounds splits month into the first day of the month and the first day fo the following month

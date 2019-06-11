@@ -1,9 +1,9 @@
-package s3store
+package store
 
 import (
 	"fmt"
-	"io"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -27,7 +27,8 @@ func createSessionOrFatal() *(session.Session) {
 
 // Upload uploads bytes from `reader` to S3 bucket `bucket`.
 // The created objects name will be {fileName}{timestamp}?{fileExtension}
-func Upload(reader io.Reader, bucket string, fileName string, fileExtension string, includeTimestamp bool) (*(s3manager.UploadOutput), error) {
+func Upload(contents string, bucket string, fileName string, fileExtension string, includeTimestamp bool) (*(s3manager.UploadOutput), error) {
+	reader := strings.NewReader(contents)
 	uploader := s3manager.NewUploader(awsSess)
 	fullKey := fileName
 	if includeTimestamp {
