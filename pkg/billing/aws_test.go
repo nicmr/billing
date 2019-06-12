@@ -21,3 +21,79 @@ func TestAWS(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestSplitIntoBounds(t *testing.T) {
+	const iso8601 = "2006-01-02"
+	{
+		// given 31 day month
+		samplemonth := "2019-03-22"
+		month, err := time.Parse(iso8601, samplemonth)
+		if err != nil {
+			t.Errorf("Error in TestSplitIntoBounds setup: can't parse date: %v", err)
+		}
+
+		// when
+		first, last := splitIntoBounds(month)
+
+		// then
+		if first != "2019-03-01" ||
+			last != "2019-04-01" {
+			t.Errorf("Wrong date bounds for 31 day month")
+		}
+	}
+
+	{
+		// given 30 day month
+		samplemonth := "2019-04-23"
+		month, err := time.Parse(iso8601, samplemonth)
+		if err != nil {
+			t.Errorf("Error in TestSplitIntoBounds setup: can't parse date: %v", err)
+		}
+
+		// when
+		first, last := splitIntoBounds(month)
+
+		// then
+		if first != "2019-04-01" ||
+			last != "2019-05-01" {
+			t.Errorf("Wrong date bounds for 30 day month")
+		}
+	}
+
+	{
+		// given 28 day month
+		samplemonth := "2019-02-21"
+		month, err := time.Parse(iso8601, samplemonth)
+		if err != nil {
+			t.Errorf("Error in TestSplitIntoBounds setup: can't parse date: %v", err)
+		}
+
+		// when
+		first, last := splitIntoBounds(month)
+
+		// then
+		if first != "2019-02-01" ||
+			last != "2019-03-01" {
+			t.Errorf("Wrong date bounds for 28 day month")
+		}
+	}
+
+	{
+		// given 29 day month
+		samplemonth := "2016-02-21"
+		month, err := time.Parse(iso8601, samplemonth)
+		if err != nil {
+			t.Errorf("Error in TestSplitIntoBounds setup: can't parse date: %v", err)
+		}
+
+		// when
+		first, last := splitIntoBounds(month)
+
+		// then
+		if first != "2016-02-01" ||
+			last != "2016-03-01" {
+			t.Errorf("Wrong date bounds for 29 day month")
+		}
+	}
+
+}
