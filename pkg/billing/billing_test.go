@@ -1,12 +1,11 @@
 package billing
 
 import (
-	"log"
 	"testing"
 	"time"
 )
 
-func TestCostCalc(t *testing.T) {
+func TestCalculateCosts(t *testing.T) {
 
 	// create a mocked provider
 	testingProvider := CloudProvider{
@@ -31,12 +30,14 @@ func TestCostCalc(t *testing.T) {
 	monthstring := "2019-04-01"
 	month, err := time.Parse(iso8601, monthstring)
 	if err != nil {
-		log.Println("error parsing date string", err) // should never happen
-		t.FailNow()
+		t.Errorf("error parsing date string %v", err)
 	}
 
 	// Call the function we want to test with the created parameters
-	CalculateCosts(testingProvider, month, 0.0)
+	_, err = CalculateCosts(testingProvider, month, 0.0)
+	if err != nil {
+		t.Errorf("Failed calculating costs: %v", err)
+	}
 
 }
 
@@ -59,10 +60,10 @@ func TestApplyMargin(t *testing.T) {
 	totals := applyMargin(testEntries, testMargin)
 
 	if totals[0] != 1000.0*1.2 {
-		log.Printf("Failed to correctly apply margin %g to value %g", testMargin, totals[0])
+		t.Errorf("Failed to correctly apply margin %g to value %g", testMargin, totals[0])
 	}
 	if totals[1] != 0.05*1.2 {
-		log.Printf("Failed to correctly apply margin %g to value %g", testMargin, totals[1])
+		t.Errorf("Failed to correctly apply margin %g to value %g", testMargin, totals[1])
 	}
 
 	// Tests with margin = 0
@@ -70,10 +71,10 @@ func TestApplyMargin(t *testing.T) {
 	totals = applyMargin(testEntries, testMargin)
 
 	if totals[0] != 1000.0 {
-		log.Printf("Failed to correctly apply margin %g to value %g", testMargin, totals[0])
+		t.Errorf("Failed to correctly apply margin %g to value %g", testMargin, totals[0])
 	}
 	if totals[1] != 0.05 {
-		log.Printf("Failed to correctly apply margin %g to value %g", testMargin, totals[1])
+		t.Errorf("Failed to correctly apply margin %g to value %g", testMargin, totals[1])
 	}
 
 }
