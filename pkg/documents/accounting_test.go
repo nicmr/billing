@@ -33,7 +33,7 @@ func TestGenerateAccountingDocument(t *testing.T) {
 
 	// for other ChargeBack fields
 	testMargin := 0.2
-	testCurrency := "$"
+	testCurrency := "USD"
 	testProviderResponse := "Manually generated test provider response"
 	testTimeStamp := time.Now()
 
@@ -49,17 +49,18 @@ func TestGenerateAccountingDocument(t *testing.T) {
 				testProjectID,
 				testContactPerson,
 				testAmount,
+				testCurrency,
 			),
 			NewBill(
 				testProjectNameAlt,
 				testProjectIDAlt,
 				testContactPersonAlt,
 				testAmountAlt,
+				testCurrency,
 			),
 		},
 		testMargin,
 		testMonth,
-		testCurrency,
 		testProviderResponse,
 		testTimeStamp,
 	)
@@ -86,16 +87,16 @@ func TestNewChargeBack(t *testing.T) {
 	testProjectID := "12345"
 	testContactPerson := "John Doe"
 	testAmount := 1.44
-	entry := NewBill(testProjectName, testProjectID, testContactPerson, testAmount)
+	testCurrency := "USD"
+	entry := NewBill(testProjectName, testProjectID, testContactPerson, testAmount, testCurrency)
 
 	entries := []Bill{
 		entry,
 	}
 	testMargin := 0.2
-	testCurrency := "$"
 
 	// when
-	chargeback := NewChargeBack(entries, testMargin, testMonth, testCurrency, "test provider response", time.Now())
+	chargeback := NewChargeBack(entries, testMargin, testMonth, "test provider response", time.Now())
 
 	// then
 	for i, inputEntry := range chargeback.bills {
@@ -110,7 +111,8 @@ func TestNewBill(t *testing.T) {
 	testProjectID := "12345"
 	testContactPerson := "John Doe"
 	testAmount := 1.44
-	entry := NewBill(testProjectName, testProjectID, testContactPerson, testAmount)
+	testCurrency := "USD"
+	entry := NewBill(testProjectName, testProjectID, testContactPerson, testAmount, testCurrency)
 
 	if entry.ProjectID != testProjectID ||
 		entry.ContactPerson != testContactPerson ||

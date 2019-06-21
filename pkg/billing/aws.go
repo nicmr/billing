@@ -46,9 +46,9 @@ func costsMonthlyAWS(month time.Time) (apiCallResult, error) {
 		entries[i] = apiCallResultEntry{
 			ProjectID: strings.Replace(*group.Keys[0], "project-number$", "", 1),
 			Amount:    amount,
+			Currency:  *(group.Metrics[amortizedCost].Unit),
 		}
 	}
-
 	result := apiCallResult{
 		Timestamp:      time.Now(),
 		ResponseString: output.String(),

@@ -10,8 +10,6 @@ import (
 
 // CalculateChargeBack calculates the costs in the passed month at the specified provider and calculates the total cost with the specified margin.
 func CalculateChargeBack(provider CloudProvider, month time.Time, margin float64) (documents.ChargeBack, error) {
-	// TODO: replace faked currency with real parsed value
-	currency := "$"
 
 	apiresult, err := provider.apicall(month)
 	if err != nil {
@@ -21,9 +19,9 @@ func CalculateChargeBack(provider CloudProvider, month time.Time, margin float64
 	bills := make([]documents.Bill, len(apiresult.Entries))
 	for i, entry := range apiresult.Entries {
 		amount := applyMargin(entry, margin)
-		bills[i] = documents.NewBill("Project Name not yet implemented", entry.ProjectID, "Contact person not yet implemented", amount)
+		bills[i] = documents.NewBill("Project Name not yet implemented", entry.ProjectID, "Contact person not yet implemented", amount, entry.Currency)
 	}
-	chargeback := documents.NewChargeBack(bills, margin, month, currency, apiresult.ResponseString, apiresult.Timestamp)
+	chargeback := documents.NewChargeBack(bills, margin, month, apiresult.ResponseString, apiresult.Timestamp)
 	return chargeback, nil
 }
 

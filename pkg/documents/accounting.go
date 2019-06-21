@@ -15,7 +15,6 @@ type ChargeBack struct {
 	month                     time.Time
 	bills                     []Bill
 	usedMargin                float64
-	currency                  string
 	provider                  string
 	providerResponse          string
 	providerResponseTimeStamp time.Time
@@ -27,15 +26,15 @@ type Bill struct {
 	ProjectID     string
 	ContactPerson string
 	Amount        float64
+	Currency      string
 }
 
 // NewChargeBack returns a ChargeBack to be passed to the Different methods of the package
 // This is the preferred method of instantiating a struct of this type
-func NewChargeBack(bills []Bill, margin float64, month time.Time, currency string, providerResponse string, providerResponseTimeStamp time.Time) ChargeBack {
+func NewChargeBack(bills []Bill, margin float64, month time.Time, providerResponse string, providerResponseTimeStamp time.Time) ChargeBack {
 	return ChargeBack{
 		bills:                     bills,
 		usedMargin:                margin,
-		currency:                  currency,
 		providerResponse:          providerResponse,
 		providerResponseTimeStamp: providerResponseTimeStamp,
 		month:                     month,
@@ -44,12 +43,13 @@ func NewChargeBack(bills []Bill, margin float64, month time.Time, currency strin
 
 // NewBill returns a Transfer to be used to create a GeneratorInput struct.
 // This is the preferred method of instantiating a struct of this type
-func NewBill(projectname string, projectID string, contactPerson string, amount float64) Bill {
+func NewBill(projectname string, projectID string, contactPerson string, amount float64, currency string) Bill {
 	return Bill{
 		ProjectName:   projectname,
 		ProjectID:     projectID,
 		ContactPerson: contactPerson,
 		Amount:        amount,
+		Currency:      currency,
 	}
 
 }
