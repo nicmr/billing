@@ -34,6 +34,8 @@ func TestGenerateAccountingDocument(t *testing.T) {
 	// for other ChargeBack fields
 	testMargin := 0.2
 	testCurrency := "$"
+	testProviderResponse := "Manually generated test provider response"
+	testTimeStamp := time.Now()
 
 	// expected
 	expected := "Position,Month,ProjectName,ProjectID,ContactPerson,Margin,Amount\n" +
@@ -41,28 +43,29 @@ func TestGenerateAccountingDocument(t *testing.T) {
 		fmt.Sprintf("2,2019-May,\"%s\",%s,%s,0.200,1.440\n", testProjectNameAlt, testProjectIDAlt, testContactPersonAlt)
 
 	chargeback := NewChargeBack(
-		[]Transfer{
-			NewTransfer(
+		[]Bill{
+			NewBill(
 				testProjectName,
 				testProjectID,
-				testMonth,
 				testContactPerson,
 				testAmount,
 			),
-			NewTransfer(
+			NewBill(
 				testProjectNameAlt,
 				testProjectIDAlt,
-				testMonth,
 				testContactPersonAlt,
 				testAmountAlt,
 			),
 		},
 		testMargin,
+		testMonth,
 		testCurrency,
+		testProviderResponse,
+		testTimeStamp,
 	)
 
 	// when
-	accountingDoc := GenerateAccountingDocument(chargeback)
+	accountingDoc := GenerateAccountingDocumentWithLocale(chargeback, "EN")
 
 	if expected != accountingDoc {
 		t.Errorf("%v should be %v", accountingDoc, expected)
@@ -72,7 +75,6 @@ func TestGenerateAccountingDocument(t *testing.T) {
 }
 
 func TestNewChargeBack(t *testing.T) {
-	//given ....
 	// given
 	monthLayout := "2006-Jan"
 	monthString := "2019-May"
@@ -80,40 +82,37 @@ func TestNewChargeBack(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error in test setup - Can't parse testmonth")
 	}
-
 	testProjectName := "Doe Company"
 	testProjectID := "12345"
 	testContactPerson := "John Doe"
 	testAmount := 1.44
-	entry := NewTransfer(testProjectName, testProjectID, testMonth, testContactPerson, testAmount)
+	entry := NewBill(testProjectName, testProjectID, testContactPerson, testAmount)
 
-	entries := []Transfer{
+	entries := []Bill{
 		entry,
 	}
 	testMargin := 0.2
 	testCurrency := "$"
 
-	// when ....
-	chargeback := NewChargeBack(entries, testMargin, testCurrency)
+	// when
+	chargeback := NewChargeBack(entries, testMargin, testMonth, testCurrency, "test provider response", time.Now())
 
 	// then
-	for i, inputEntry := range chargeback.transfers {
+	for i, inputEntry := range chargeback.bills {
 		if !cmp.Equal(entries[i], inputEntry) {
 			t.Fail()
 		}
 	}
 }
 
-func TestNewTransfer(t *testing.T) {
+func TestNewBill(t *testing.T) {
 	testProjectName := "Doe Company"
 	testProjectID := "12345"
-	testMonth := time.Now()
 	testContactPerson := "John Doe"
 	testAmount := 1.44
-	entry := NewTransfer(testProjectName, testProjectID, testMonth, testContactPerson, testAmount)
+	entry := NewBill(testProjectName, testProjectID, testContactPerson, testAmount)
 
-	if entry.Month != testMonth ||
-		entry.ProjectID != testProjectID ||
+	if entry.ProjectID != testProjectID ||
 		entry.ContactPerson != testContactPerson ||
 		entry.Amount != testAmount {
 		t.Fail()
@@ -132,7 +131,7 @@ func TestFormatRow(t *testing.T) {
 		t.Errorf("Error in test setup - Can't parse testmonth")
 	}
 
-	testpos := 0
+	testpos := 1
 	testName := "testName"
 	testID := "123"
 	testContactPerson := "John Doe"
@@ -140,7 +139,7 @@ func TestFormatRow(t *testing.T) {
 	testAmount := 1.23456789
 	expected := []string{"1", monthString, testName, testID, testContactPerson, "0.200", "1.235"}
 
-	row := formatRow(testpos, testmonth, testName, testID, testContactPerson, testMargin, testAmount, false)
+	row := formatRow(testpos, testmonth, testName, testID, testContactPerson, testMargin, testAmount, "EN")
 
 	if !cmp.Equal(row, expected) {
 		t.Errorf("%v should be %v", row, expected)

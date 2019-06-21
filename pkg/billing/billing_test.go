@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestCalculateCosts(t *testing.T) {
+func TestCalculateChargeBack(t *testing.T) {
 
 	// create a mocked provider
 	testingProvider := CloudProvider{
@@ -34,7 +34,7 @@ func TestCalculateCosts(t *testing.T) {
 	}
 
 	// Call the function we want to test with the created parameters
-	_, err = CalculateCosts(testingProvider, month, 0.0)
+	_, err = CalculateChargeBack(testingProvider, month, 0.0)
 	if err != nil {
 		t.Errorf("Failed calculating costs: %v", err)
 	}
@@ -42,39 +42,39 @@ func TestCalculateCosts(t *testing.T) {
 }
 
 func TestApplyMargin(t *testing.T) {
-	testEntries := []apiCallResultEntry{
-		apiCallResultEntry{
-			ProjectID: "testing",
-			Amount:    1000.0,
-			Currency:  "$",
-		},
-		apiCallResultEntry{
-			ProjectID: "testing2",
-			Amount:    0.05,
-			Currency:  "$",
-		},
+	testEntry := apiCallResultEntry{
+		ProjectID: "testing",
+		Amount:    1000.0,
+		Currency:  "$",
 	}
 
-	// Tests with 0 < margin < 1
-	testMargin := 0.2
-	totals := applyMargin(testEntries, testMargin)
+	// Tests with 0 < margin
+	{
+		testMargin := 0.2
+		total := applyMargin(testEntry, testMargin)
 
-	if totals[0] != 1000.0*1.2 {
-		t.Errorf("Failed to correctly apply margin %g to value %g", testMargin, totals[0])
-	}
-	if totals[1] != 0.05*1.2 {
-		t.Errorf("Failed to correctly apply margin %g to value %g", testMargin, totals[1])
+		if total != 1000.0*1.2 {
+			t.Errorf("Failed to correctly apply margin %g to value %g", testMargin, total)
+		}
 	}
 
 	// Tests with margin = 0
-	testMargin = 0.0
-	totals = applyMargin(testEntries, testMargin)
+	{
+		testMargin := 0.0
+		total := applyMargin(testEntry, testMargin)
 
-	if totals[0] != 1000.0 {
-		t.Errorf("Failed to correctly apply margin %g to value %g", testMargin, totals[0])
-	}
-	if totals[1] != 0.05 {
-		t.Errorf("Failed to correctly apply margin %g to value %g", testMargin, totals[1])
+		if total != 1000.0 {
+			t.Errorf("Failed to correctly apply margin %g to value %g", testMargin, total)
+		}
 	}
 
+	// TODO: Tests with margin < 0
+	// Should error?
+	{
+
+	}
 }
+
+// func TestToChargeBack(t *testing.T) {
+
+// }

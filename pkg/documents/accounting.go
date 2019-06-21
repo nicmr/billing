@@ -12,36 +12,41 @@ import (
 
 // ChargeBack contains all information about a set of chargebacks required by the functions of this package
 type ChargeBack struct {
-	transfers  []Transfer
-	usedMargin float64
-	currency   string
+	month                     time.Time
+	bills                     []Bill
+	usedMargin                float64
+	currency                  string
+	provider                  string
+	providerResponse          string
+	providerResponseTimeStamp time.Time
 }
 
-// Transfer represents a single entry of entry-specific information in the ChargeBack struct
-type Transfer struct {
+// Bill represents a single entry of entry-specific information in the ChargeBack struct
+type Bill struct {
 	ProjectName   string
 	ProjectID     string
 	ContactPerson string
-	Month         time.Time
 	Amount        float64
 }
 
 // NewChargeBack returns a ChargeBack to be passed to the Different methods of the package
 // This is the preferred method of instantiating a struct of this type
-func NewChargeBack(transfers []Transfer, margin float64, currency string) ChargeBack {
+func NewChargeBack(bills []Bill, margin float64, month time.Time, currency string, providerResponse string, providerResponseTimeStamp time.Time) ChargeBack {
 	return ChargeBack{
-		transfers:  transfers,
-		usedMargin: margin,
-		currency:   currency,
+		bills:                     bills,
+		usedMargin:                margin,
+		currency:                  currency,
+		providerResponse:          providerResponse,
+		providerResponseTimeStamp: providerResponseTimeStamp,
+		month:                     month,
 	}
 }
 
-// NewTransfer returns a Transfer to be used to create a GeneratorInput struct.
+// NewBill returns a Transfer to be used to create a GeneratorInput struct.
 // This is the preferred method of instantiating a struct of this type
-func NewTransfer(projectname string, projectID string, month time.Time, contactPerson string, amount float64) Transfer {
-	return Transfer{
+func NewBill(projectname string, projectID string, contactPerson string, amount float64) Bill {
+	return Bill{
 		ProjectName:   projectname,
-		Month:         month,
 		ProjectID:     projectID,
 		ContactPerson: contactPerson,
 		Amount:        amount,
@@ -49,8 +54,30 @@ func NewTransfer(projectname string, projectID string, month time.Time, contactP
 
 }
 
-// GenerateAccountingDocument creates a string, formatted for use by accountants that will have to enter the invoice data into their company's ERP system
-func GenerateAccountingDocument(chargeback ChargeBack) string {
+// GenerateAuditLog generates a timestamped audit log with the exact response received from the costapi
+func GenerateAuditLog(chargeback ChargeBack) string {
+
+	layout := "2006-01-02 Mon 15:04:05 -0700 MST"
+	timestamp := chargeback.providerResponseTimeStamp.Format(layout)
+
+	return fmt.Sprintf("Audit log generated on: %v\nCloud provider: %v\n%v", timestamp, chargeback.provider, chargeback.providerResponse)
+}
+
+// GenerateAccountingDocumentWithLocale generates a document for accounting
+// Currently, this is a .csv document. CSV has to be adapted for different locales to work with excel.
+func GenerateAccountingDocumentWithLocale(chargeback ChargeBack, locale string) string {
+	locale = strings.ToUpper(locale)
+
+	// Init csv writer
+	content := new(bytes.Buffer)
+	writer := csv.NewWriter(content)
+
+	switch locale {
+	case "DE":
+		writer.Comma = ';'
+	default:
+		// use the default comma separator as in RFC 4180
+	}
 
 	// Order should match order of row values below in `orderedRowValues`
 	columnHeaders := []string{
@@ -62,56 +89,59 @@ func GenerateAccountingDocument(chargeback ChargeBack) string {
 		"Margin",
 		"Amount",
 	}
-	// generate csv columns
-
-	// Init csv writer
-	content := new(bytes.Buffer)
-	writer := csv.NewWriter(content)
-
-	// Init csv writer for csv compatible with Microsoft Excel with German(DE) locale
-	contentGER := new(bytes.Buffer)
-	writerGER := csv.NewWriter(contentGER)
-	writerGER.Comma = ';'
 
 	// write column headers
 	writer.Write(columnHeaders)
-	writerGER.Write(columnHeaders)
 
-	for i, row := range chargeback.transfers {
+	for i, bill := range chargeback.bills {
 		// Order should match order of columns above in `orderedColumnHeaders`
-		orderedRowValues := formatRow(i, row.Month, row.ProjectName, row.ProjectID, row.ContactPerson, chargeback.usedMargin, row.Amount, false)
-		orderedRowValuesGER := formatRow(i, row.Month, row.ProjectName, row.ProjectID, row.ContactPerson, chargeback.usedMargin, row.Amount, true)
+		orderedRowValues := formatRow(i+1, chargeback.month, bill.ProjectName, bill.ProjectID, bill.ContactPerson, chargeback.usedMargin, bill.Amount, locale)
 		writer.Write(orderedRowValues)
-		writerGER.Write(orderedRowValuesGER)
 	}
 
 	writer.Flush()
-	writerGER.Flush()
-	fmt.Printf("GER csv:\n%v\n", contentGER.String())
 
 	return content.String()
 }
 
-func formatRow(position int, month time.Time, projectName string, projectID string, contactPerson string, usedMargin float64, amount float64, decimalComma bool) []string {
+func formatRow(position int, month time.Time, projectName string, projectID string, contactPerson string, usedMargin float64, amount float64, locale string) []string {
+
+	// format parameters as strings where necessary
+	posString := strconv.Itoa(position)
 	monthFormat := "2006-Jan"
-
-	marginString := fmt.Sprintf("%.3f", usedMargin)
-	amountString := fmt.Sprintf("%.3f", amount)
-
-	if decimalComma {
-		amountString = strings.Replace(amountString, ".", ",", -1)
-		marginString = strings.Replace(marginString, ".", ",", -1)
-	}
+	monthString := month.Format(monthFormat)
+	name := trim(projectName)
+	localisedMargin := formatFloatLocale(usedMargin, locale)
+	localisedAmount := formatFloatLocale(amount, locale)
 
 	return []string{
-		strconv.Itoa(position + 1),
-		month.Format(monthFormat),
-		trim(projectName),
+		posString,
+		monthString,
+		name,
 		projectID,
 		contactPerson,
-		marginString,
-		amountString,
+		localisedMargin,
+		localisedAmount,
 	}
+}
+
+// formatFloatLocale formats the passed float for use with the passed locale string.
+// currentyl supported locale strings are as follows:
+// - "DE" for decimal comma
+// All locales not presest on the list above will apply the default formatting, using a decimal point
+func formatFloatLocale(value float64, locale string) string {
+	locale = strings.ToUpper(locale)
+
+	str := fmt.Sprintf("%.3f", value)
+
+	switch locale {
+	case "DE":
+		str = strings.Replace(str, ".", ",", -1)
+	default:
+		// for other locales, the default format using decimal points is acceptable
+	}
+
+	return str
 }
 
 func trim(text string) string {

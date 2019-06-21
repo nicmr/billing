@@ -15,6 +15,7 @@ type APICall func(time.Time) (apiCallResult, error)
 // CloudProvider wraps the function required to retrieve billing data from a CloudProvider, such as AWS or Azure
 type CloudProvider struct {
 	apicall APICall
+	name    string
 }
 
 // Default returns a default `APICall`, currently AWS
@@ -24,17 +25,17 @@ func Default() CloudProvider {
 
 // AWS returns a CloudProvider struct to be passed to CostCalc for cost calculation with the AWS Cost Explorer API
 func AWS() CloudProvider {
-	return CloudProvider{apicall: costsMonthlyAWS}
+	return CloudProvider{apicall: costsMonthlyAWS, name: "AWS"}
 }
 
 // Azure returns a CloudProvider struct to be passed to CostCalc for cost calculation with the Azure Cost Explorer API
 func Azure() CloudProvider {
-	return CloudProvider{apicall: costsMonthlyAzure}
+	return CloudProvider{apicall: costsMonthlyAzure, name: "Azure"}
 }
 
 // OnPremise returns a CloudProvider struct to be passed to CostCalc for cost calculation with an on-premise solution
 func OnPremise() CloudProvider {
-	return CloudProvider{apicall: costsMonthlyOnPremise}
+	return CloudProvider{apicall: costsMonthlyOnPremise, name: "OnPremise"}
 }
 
 // apiCallResult contains a Timestamp and ResponseString

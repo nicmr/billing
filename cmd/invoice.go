@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/Altemista/altemista-billing/pkg/app"
 	"github.com/Altemista/altemista-billing/pkg/billing"
+	"github.com/Altemista/altemista-billing/pkg/cmd"
 )
 
 var (
@@ -79,7 +79,7 @@ func invoice() {
 	}
 
 	// Flag and arg parsing complete, pass to application code
-	err = app.Run(costProvider, parsedMonth, margin, bucket)
+	err = cmd.Run(costProvider, parsedMonth, margin, bucket)
 	if err != nil {
 		log.Fatal(err)
 	}
