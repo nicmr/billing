@@ -25,12 +25,9 @@ func Run(provider billing.CloudProvider, month time.Time, margin float64, bucket
 	auditLog := documents.GenerateAuditLog(chargeBack)
 
 	// Upload to S3
-	filename := "bills/test_costs_"
-	fileExtension := ".csv"
-	useTimestamp := true
-	store.Upload(accountingDocumentEN, bucket, filename, fileExtension, useTimestamp)
-	store.Upload(accountingDocumentDE, bucket, filename+"DE", fileExtension, useTimestamp)
-	store.Upload(auditLog, bucket, "auditLog", fileExtension, useTimestamp)
+	store.Upload(accountingDocumentEN, bucket, "invoice", "csv", month)
+	store.Upload(accountingDocumentDE, bucket, "invoiceDE", "csv", month)
+	store.Upload(auditLog, bucket, "auditLog", "log", month)
 
 	// Print generated accountingDocument to stdout
 	log.Println(accountingDocumentEN)

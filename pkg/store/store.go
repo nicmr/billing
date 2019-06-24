@@ -26,28 +26,39 @@ func createSessionOrFatal() *(session.Session) {
 }
 
 // Upload uploads bytes from `reader` to S3 bucket `bucket`.
-// The created objects name will be {fileName}{timestamp}?{fileExtension}
-func Upload(contents string, bucket string, fileName string, fileExtension string, includeTimestamp bool) (*(s3manager.UploadOutput), error) {
+// The created objects name will be created according to store.s3KeyScheme
+func Upload(contents string, bucket string, filename string, fileExtension string, month time.Time) (*(s3manager.UploadOutput), error) {
 	reader := strings.NewReader(contents)
 	uploader := s3manager.NewUploader(awsSess)
-	fullKey := fileName
-	if includeTimestamp {
-		now := time.Now().Format("_2006-01-02_15:04:05")
-		fullKey += now
-	}
-	fullKey += fileExtension
+
+	key := s3KeyScheme(month, filename)
 
 	// Upload the file to S3
 	result, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(bucket),
-		Key:    aws.String(fullKey),
+		Key:    aws.String(key),
 		Body:   reader,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to upload file, %v", err)
 	}
 
-	log.Println("Uploaded as fileName: ", fullKey)
+	log.Println("Uploaded as fileName: ", key)
 
 	return result, nil
+}
+
+func s3KeyScheme(month time.Time, filename string) string {
+	iso8601 := "2006-01-02"
+
+	yearprefix := month.Format("2006")
+	monthprefix := month.Format("Jan")
+	monthstr := month.Format(iso8601)
+
+	key := fmt.Sprintf("%s/%s/%s_%s_%s.%s",
+		yearprefix, monthprefix,
+		filename, monthstr, time.Now().Format("2006-01-02-15:04:05"),
+		"csv")
+
+	return key
 }
