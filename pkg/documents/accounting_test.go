@@ -155,14 +155,28 @@ func TestFormatRow(t *testing.T) {
 	testMargin := 0.2
 	testAmount := 1.23456789
 	testCurrency := "USD"
-	expected := []string{"1", monthString, testName, testID, testContactPerson, "0.200", "1.235", testCurrency}
 
 	// when
-	row := formatRow(testpos, testmonth, testName, testID, testContactPerson, testMargin, testAmount, testCurrency, "EN")
+	// English locale
+	{
+		row := formatRow(testpos, testmonth, testName, testID, testContactPerson, testMargin, testAmount, testCurrency, "EN")
+		expected := []string{"1", monthString, testName, testID, testContactPerson, "0.200", "1.235", testCurrency}
 
-	// then
-	if !cmp.Equal(row, expected) {
-		t.Errorf("%v should be %v", row, expected)
+		// then
+		if !cmp.Equal(row, expected) {
+			t.Errorf("%v should be %v", row, expected)
+		}
+	}
+
+	// German locale
+	{
+		row := formatRow(testpos, testmonth, testName, testID, testContactPerson, testMargin, testAmount, testCurrency, "DE")
+		expected := []string{"1", monthString, testName, testID, testContactPerson, "0,200", "1,235", testCurrency}
+
+		// then
+		if !cmp.Equal(row, expected) {
+			t.Errorf("%v should be %v", row, expected)
+		}
 	}
 }
 
