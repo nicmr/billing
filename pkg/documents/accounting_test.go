@@ -37,11 +37,6 @@ func TestGenerateAccountingDocument(t *testing.T) {
 	testProviderResponse := "Manually generated test provider response"
 	testTimeStamp := time.Now()
 
-	// expected
-	expected := "Position,Month,ProjectName,ProjectID,ContactPerson,Margin,Amount,Currency\n" +
-		fmt.Sprintf("1,2019-May,%s,%s,%s,0.200,1.440,%s\n", testProjectName, testProjectID, testContactPerson, testCurrency) +
-		fmt.Sprintf("2,2019-May,\"%s\",%s,%s,0.200,1.440,%s\n", testProjectNameAlt, testProjectIDAlt, testContactPersonAlt, testCurrency)
-
 	chargeback := NewChargeBack(
 		[]Bill{
 			NewBill(
@@ -66,13 +61,33 @@ func TestGenerateAccountingDocument(t *testing.T) {
 	)
 
 	// when
-	accountingDoc := GenerateAccountingDocumentWithLocale(chargeback, "EN")
+	// EN locale
+	{
+		accountingDoc := GenerateAccountingDocumentWithLocale(chargeback, "EN")
 
-	if expected != accountingDoc {
-		t.Errorf("%v should be %v", accountingDoc, expected)
+		// then
+		expected := "Position,Month,ProjectName,ProjectID,ContactPerson,Margin,Amount,Currency\n" +
+			fmt.Sprintf("1,2019-May,%s,%s,%s,0.200,1.440,%s\n", testProjectName, testProjectID, testContactPerson, testCurrency) +
+			fmt.Sprintf("2,2019-May,\"%s\",%s,%s,0.200,1.440,%s\n", testProjectNameAlt, testProjectIDAlt, testContactPersonAlt, testCurrency)
+
+		if expected != accountingDoc {
+			t.Errorf("%v should be %v", accountingDoc, expected)
+		}
+	}
+	//DE locale
+	{
+		accountingDoc := GenerateAccountingDocumentWithLocale(chargeback, "DE")
+
+		// then
+		expected := "Position;Month;ProjectName;ProjectID;ContactPerson;Margin;Amount;Currency\n" +
+			fmt.Sprintf("1;2019-May;%s;%s;%s;0,200;1,440;%s\n", testProjectName, testProjectID, testContactPerson, testCurrency) +
+			fmt.Sprintf("2;2019-May;%s;%s;%s;0,200;1,440;%s\n", testProjectNameAlt, testProjectIDAlt, testContactPersonAlt, testCurrency)
+
+		if expected != accountingDoc {
+			t.Errorf("%v should be %v", accountingDoc, expected)
+		}
 	}
 
-	// then
 }
 
 func TestNewChargeBack(t *testing.T) {
