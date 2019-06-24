@@ -49,14 +49,15 @@ func Upload(contents string, bucket string, filename string, fileExtension strin
 }
 
 func s3KeyScheme(month time.Time, filename string) string {
-	iso8601 := "2006-01-02"
-
+	parentprefix := "invoices"
 	yearprefix := month.Format("2006")
 	monthprefix := month.Format("Jan")
-	monthstr := month.Format(iso8601)
 
-	key := fmt.Sprintf("%s/%s/%s_%s_%s.%s",
-		yearprefix, monthprefix,
+	monthformat := "2006-01"
+	monthstr := month.Format(monthformat)
+
+	key := fmt.Sprintf("%s/%s/%s/%s_%s_%s.%s",
+		parentprefix, yearprefix, monthprefix,
 		filename, monthstr, time.Now().Format("2006-01-02-15:04:05"),
 		"csv")
 
