@@ -88,6 +88,7 @@ func GenerateAccountingDocumentWithLocale(chargeback ChargeBack, locale string) 
 		"ContactPerson",
 		"Margin",
 		"Amount",
+		"Currency",
 	}
 
 	// write column headers
@@ -95,7 +96,7 @@ func GenerateAccountingDocumentWithLocale(chargeback ChargeBack, locale string) 
 
 	for i, bill := range chargeback.bills {
 		// Order should match order of columns above in `orderedColumnHeaders`
-		orderedRowValues := formatRow(i+1, chargeback.month, bill.ProjectName, bill.ProjectID, bill.ContactPerson, chargeback.usedMargin, bill.Amount, locale)
+		orderedRowValues := formatRow(i+1, chargeback.month, bill.ProjectName, bill.ProjectID, bill.ContactPerson, chargeback.usedMargin, bill.Amount, bill.Currency, locale)
 		writer.Write(orderedRowValues)
 	}
 
@@ -104,7 +105,7 @@ func GenerateAccountingDocumentWithLocale(chargeback ChargeBack, locale string) 
 	return content.String()
 }
 
-func formatRow(position int, month time.Time, projectName string, projectID string, contactPerson string, usedMargin float64, amount float64, locale string) []string {
+func formatRow(position int, month time.Time, projectName string, projectID string, contactPerson string, usedMargin float64, amount float64, currency string, locale string) []string {
 
 	// format parameters as strings where necessary
 	posString := strconv.Itoa(position)
@@ -122,6 +123,7 @@ func formatRow(position int, month time.Time, projectName string, projectID stri
 		contactPerson,
 		localisedMargin,
 		localisedAmount,
+		currency,
 	}
 }
 

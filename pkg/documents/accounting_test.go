@@ -38,9 +38,9 @@ func TestGenerateAccountingDocument(t *testing.T) {
 	testTimeStamp := time.Now()
 
 	// expected
-	expected := "Position,Month,ProjectName,ProjectID,ContactPerson,Margin,Amount\n" +
-		fmt.Sprintf("1,2019-May,%s,%s,%s,0.200,1.440\n", testProjectName, testProjectID, testContactPerson) +
-		fmt.Sprintf("2,2019-May,\"%s\",%s,%s,0.200,1.440\n", testProjectNameAlt, testProjectIDAlt, testContactPersonAlt)
+	expected := "Position,Month,ProjectName,ProjectID,ContactPerson,Margin,Amount,Currency\n" +
+		fmt.Sprintf("1,2019-May,%s,%s,%s,0.200,1.440,%s\n", testProjectName, testProjectID, testContactPerson, testCurrency) +
+		fmt.Sprintf("2,2019-May,\"%s\",%s,%s,0.200,1.440,%s\n", testProjectNameAlt, testProjectIDAlt, testContactPersonAlt, testCurrency)
 
 	chargeback := NewChargeBack(
 		[]Bill{
@@ -122,7 +122,7 @@ func TestNewBill(t *testing.T) {
 
 }
 
-// TODO: test pnce more with DecimalCommas on
+// TODO: test once more with DecimalCommas on
 // Consider: Passing the decimal operator explicitly may be a better solution, as it avoids different control flow branches
 func TestFormatRow(t *testing.T) {
 	// given
@@ -139,10 +139,13 @@ func TestFormatRow(t *testing.T) {
 	testContactPerson := "John Doe"
 	testMargin := 0.2
 	testAmount := 1.23456789
-	expected := []string{"1", monthString, testName, testID, testContactPerson, "0.200", "1.235"}
+	testCurrency := "USD"
+	expected := []string{"1", monthString, testName, testID, testContactPerson, "0.200", "1.235", testCurrency}
 
-	row := formatRow(testpos, testmonth, testName, testID, testContactPerson, testMargin, testAmount, "EN")
+	// when
+	row := formatRow(testpos, testmonth, testName, testID, testContactPerson, testMargin, testAmount, testCurrency, "EN")
 
+	// then
 	if !cmp.Equal(row, expected) {
 		t.Errorf("%v should be %v", row, expected)
 	}
