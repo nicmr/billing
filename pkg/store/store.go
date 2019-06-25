@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -15,6 +16,8 @@ var (
 	// Session is safe for concurrent use after initialization,
 	// as it will not be mutated by the SDK after creation
 	awsSess = createSessionOrFatal()
+	// Uploader is also safe for concurrent use
+	uploader = s3manager.NewUploader(awsSess)
 )
 
 func createSessionOrFatal() *(session.Session) {
@@ -25,11 +28,46 @@ func createSessionOrFatal() *(session.Session) {
 	return sess
 }
 
+// UploadGroup facilitates uploading multiple files concurrently, then waiting for all of them to finish
+type UploadGroup struct {
+	wg sync.WaitGroup
+}
+
+// add adds to the UploadGroup 's WaitGroup counter
+func (group *UploadGroup) add(n int) {
+	group.wg.Add(n)
+}
+
+// Wait waits for the associated Uploads of the UploadGroup to finish
+func (group *UploadGroup) Wait() {
+	group.wg.Wait()
+}
+
+// Upload starts a new upload goroutine for the UploadGroup
+func (group *UploadGroup) Upload(contents string, bucket string, filename string, fileExtension string, month time.Time) chan error {
+	log.Println("started upload for " + filename)
+
+	group.add(1)
+	errchan := make(chan error, 1)
+
+	go func(ec chan error) {
+		log.Println("goroutine upload for " + filename)
+		defer log.Println("finished goroutine for " + filename)
+		defer group.wg.Done()
+		_, err := Upload(contents, bucket, filename, fileExtension, month)
+		ec <- err
+	}(errchan)
+
+	return errchan
+}
+
 // Upload uploads bytes from `reader` to S3 bucket `bucket`.
 // The created objects name will be created according to store.s3KeyScheme
 func Upload(contents string, bucket string, filename string, fileExtension string, month time.Time) (*(s3manager.UploadOutput), error) {
+	log.Println("Upload func called for " + filename)
+	defer log.Println("Upload func finished for " + filename)
+
 	reader := strings.NewReader(contents)
-	uploader := s3manager.NewUploader(awsSess)
 
 	key := s3KeyScheme(month, filename)
 

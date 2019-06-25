@@ -25,12 +25,65 @@ func Run(provider billing.CloudProvider, month time.Time, margin float64, bucket
 	auditLog := documents.GenerateAuditLog(chargeBack)
 
 	// Upload to S3
-	store.Upload(accountingDocumentEN, bucket, "invoiceEN", "csv", month)
-	store.Upload(accountingDocumentDE, bucket, "invoiceDE", "csv", month)
-	store.Upload(auditLog, bucket, "auditLog", "log", month)
+
+	// synchronous
+	// _, err = store.Upload(accountingDocumentEN, bucket, "invoiceEN", "csv", month)
+	// if err != nil {
+	// 	log.Println("failed to upload invoiceEN")
+	// }
+	// _, err = store.Upload(accountingDocumentDE, bucket, "invoiceDE", "csv", month)
+	// if err != nil {
+	// 	log.Println("failed to upload invoiceDE")
+	// }
+	// _, err = store.Upload(auditLog, bucket, "auditLog", "log", month)
+	// if err != nil {
+	// 	log.Println("failed to upload auditLog")
+	// }
+
+	// // asynchronous, but verbose and error-prone (wrong param to wg.Add possible)
+	// wg := new(sync.WaitGroup)
+	// wg.Add(3)
+	// go func() {
+	// 	defer wg.Done()
+	// 	_, err = store.Upload(accountingDocumentDE, bucket, "invoiceDE", "csv", month)
+	// 	if err != nil {
+	// 		log.Println("failed to upload invoiceDE")
+	// 	}
+	// }()
+	// go func() {
+	// 	defer wg.Done()
+	// 	_, err = store.Upload(accountingDocumentDE, bucket, "invoiceDE", "csv", month)
+	// 	if err != nil {
+	// 		log.Println("failed to upload invoiceDE")
+	// 	}
+	// }()
+	// go func() {
+	// 	defer wg.Done()
+	// 	_, err = store.Upload(auditLog, bucket, "auditLog", "log", month)
+	// 	if err != nil {
+	// 		log.Println("failed to upload invoiceDE")
+	// 	}
+	// }()
+
+	// asynchronous, nice interface
+	ugroup := new(store.UploadGroup)
+	errchans := []chan error{
+		ugroup.Upload(accountingDocumentDE, bucket, "invoiceDE", "csv", month),
+		ugroup.Upload(accountingDocumentEN, bucket, "invoiceEN", "csv", month),
+		ugroup.Upload(auditLog, bucket, "auditLog", "log", month),
+	}
+
+	ugroup.Wait()
+
+	for _, ec := range errchans {
+		err := <-ec
+		if err != nil {
+			log.Printf("Failed to upload element: %v\n", err)
+		}
+	}
 
 	// Print generated accountingDocument to stdout
-	log.Println(accountingDocumentEN)
+	log.Println("generated doc:\n" + accountingDocumentEN)
 
 	return nil
 }
