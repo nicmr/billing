@@ -1,4 +1,4 @@
-// Package documents provides functionality to create documents about billing data
+// Package documents provides functionality to create documents from billing data
 package documents
 
 import (
@@ -20,7 +20,7 @@ type ChargeBack struct {
 	providerResponseTimeStamp time.Time
 }
 
-// Bill represents a single entry of entry-specific information in the ChargeBack struct
+// Bill represents a bill for a single project and its associated costs for a single month
 type Bill struct {
 	ProjectName   string
 	ProjectID     string
@@ -41,7 +41,7 @@ func NewChargeBack(bills []Bill, margin float64, month time.Time, providerRespon
 	}
 }
 
-// NewBill returns a Transfer to be used to create a GeneratorInput struct.
+// NewBill returns a new Bill struct with all necessary fields set
 // This is the preferred method of instantiating a struct of this type
 func NewBill(projectname string, projectID string, contactPerson string, amount float64, currency string) Bill {
 	return Bill{
@@ -64,14 +64,15 @@ func GenerateAuditLog(chargeback ChargeBack) string {
 }
 
 // GenerateAccountingDocumentWithLocale generates a document for accounting
-// Currently, this is a .csv document. CSV has to be adapted for different locales to work with excel.
+// Currently, this is a .csv document.
+// CSV can to be adapted for different locales to work with different Microsoft Excel locales.
 func GenerateAccountingDocumentWithLocale(chargeback ChargeBack, locale string) string {
-	locale = strings.ToUpper(locale)
 
 	// Init csv writer
 	content := new(bytes.Buffer)
 	writer := csv.NewWriter(content)
 
+	locale = strings.ToUpper(locale)
 	switch locale {
 	case "DE":
 		writer.Comma = ';'
@@ -105,6 +106,7 @@ func GenerateAccountingDocumentWithLocale(chargeback ChargeBack, locale string) 
 	return content.String()
 }
 
+// formatRow formats a single row in the output document and applies locale-specific formatting where necessary
 func formatRow(position int, month time.Time, projectName string, projectID string, contactPerson string, usedMargin float64, amount float64, currency string, locale string) []string {
 
 	// format parameters as strings where necessary
@@ -112,8 +114,8 @@ func formatRow(position int, month time.Time, projectName string, projectID stri
 	monthFormat := "2006-Jan"
 	monthString := month.Format(monthFormat)
 	name := trim(projectName)
-	localisedMargin := formatFloatLocale(usedMargin, locale)
-	localisedAmount := formatFloatLocale(amount, locale)
+	localisedMargin := formatFloatWithLocale(usedMargin, locale)
+	localisedAmount := formatFloatWithLocale(amount, locale)
 
 	return []string{
 		posString,
@@ -127,11 +129,11 @@ func formatRow(position int, month time.Time, projectName string, projectID stri
 	}
 }
 
-// formatFloatLocale formats the passed float for use with the passed locale string.
+// formatFloatWithLocale formats the passed float for use with the passed locale string.
 // currentyl supported locale strings are as follows:
 // - "DE" for decimal comma
 // All locales not presest on the list above will apply the default formatting, using a decimal point
-func formatFloatLocale(value float64, locale string) string {
+func formatFloatWithLocale(value float64, locale string) string {
 	locale = strings.ToUpper(locale)
 
 	str := fmt.Sprintf("%.3f", value)
@@ -152,13 +154,3 @@ func trim(text string) string {
 	}
 	return text
 }
-
-// func formatAmount(value float64) string {
-
-// }
-
-// // ConvertableToGeneratorInput allows you to define a function for converting your structs to `GeneratorInput`s
-// // This allows them to be passed directly to the functions in the public interface of this package.
-// type ConvertableToChargeBack interface {
-// 	ToInvoiceGenInput() GeneratorInput
-// }

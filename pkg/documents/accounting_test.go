@@ -12,20 +12,20 @@ import (
 func TestGenerateAccountingDocument(t *testing.T) {
 	// given
 
-	// shared between transfers[0] and transfers[1]
+	// shared between bills[0] and bills[1]
 	monthLayout := "2006-Jan"
 	monthString := "2019-May"
 	testMonth, err := time.Parse(monthLayout, monthString)
 	if err != nil {
 		t.Errorf("Error in test setup - Can't parse testmonth")
 	}
-	// specific to transfers[0]
+	// specific to bills[0]
 	testProjectName := "Doe Company"
 	testProjectID := "12345"
 	testContactPerson := "John Doe"
 	testAmount := 1.44
 
-	// specific to transfers[1]
+	// specific to bills[1]
 	testProjectNameAlt := "Doe, Company"
 	testProjectIDAlt := "A-B"
 	testContactPersonAlt := "Jane Doe"
@@ -137,7 +137,6 @@ func TestNewBill(t *testing.T) {
 
 }
 
-// TODO: test once more with DecimalCommas on
 // Consider: Passing the decimal operator explicitly may be a better solution, as it avoids different control flow branches
 func TestFormatRow(t *testing.T) {
 	// given
