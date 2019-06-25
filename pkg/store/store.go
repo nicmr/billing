@@ -28,7 +28,8 @@ func createSessionOrFatal() *(session.Session) {
 	return sess
 }
 
-// UploadGroup facilitates uploading multiple files concurrently, then waiting for all of them to finish
+// UploadGroup facilitates uploading multiple files concurrently, then waiting for all of them to finish.
+// It is a safe abstraction around sync.WaitGroup
 type UploadGroup struct {
 	wg sync.WaitGroup
 }
@@ -38,12 +39,14 @@ func (group *UploadGroup) add(n int) {
 	group.wg.Add(n)
 }
 
-// Wait waits for the associated Uploads of the UploadGroup to finish
+// Wait blocks execution and waits for all Uploads of the UploadGroup to finish
 func (group *UploadGroup) Wait() {
 	group.wg.Wait()
 }
 
-// Upload starts a new upload goroutine for the UploadGroup
+// Upload starts a new file upload goroutine for the UploadGroup with the specified parameters
+// It returns an error channel it will write any encountered errors to.
+// If no errors are encountered, it will write nil to the channel.
 func (group *UploadGroup) Upload(contents string, bucket string, filename string, fileExtension string, month time.Time) chan error {
 	group.add(1)
 	errchan := make(chan error, 1)
