@@ -45,14 +45,10 @@ func (group *UploadGroup) Wait() {
 
 // Upload starts a new upload goroutine for the UploadGroup
 func (group *UploadGroup) Upload(contents string, bucket string, filename string, fileExtension string, month time.Time) chan error {
-	log.Println("started upload for " + filename)
-
 	group.add(1)
 	errchan := make(chan error, 1)
 
 	go func(ec chan error) {
-		log.Println("goroutine upload for " + filename)
-		defer log.Println("finished goroutine for " + filename)
 		defer group.wg.Done()
 		_, err := Upload(contents, bucket, filename, fileExtension, month)
 		ec <- err
@@ -64,8 +60,6 @@ func (group *UploadGroup) Upload(contents string, bucket string, filename string
 // Upload uploads bytes from `reader` to S3 bucket `bucket`.
 // The created objects name will be created according to store.s3KeyScheme
 func Upload(contents string, bucket string, filename string, fileExtension string, month time.Time) (*(s3manager.UploadOutput), error) {
-	log.Println("Upload func called for " + filename)
-	defer log.Println("Upload func finished for " + filename)
 
 	reader := strings.NewReader(contents)
 
