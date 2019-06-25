@@ -25,58 +25,16 @@ func Run(provider billing.CloudProvider, month time.Time, margin float64, bucket
 	auditLog := documents.GenerateAuditLog(chargeBack)
 
 	// Upload to S3
-
-	// synchronous
-	// _, err = store.Upload(accountingDocumentEN, bucket, "invoiceEN", "csv", month)
-	// if err != nil {
-	// 	log.Println("failed to upload invoiceEN")
-	// }
-	// _, err = store.Upload(accountingDocumentDE, bucket, "invoiceDE", "csv", month)
-	// if err != nil {
-	// 	log.Println("failed to upload invoiceDE")
-	// }
-	// _, err = store.Upload(auditLog, bucket, "auditLog", "log", month)
-	// if err != nil {
-	// 	log.Println("failed to upload auditLog")
-	// }
-
-	// // asynchronous, but verbose and error-prone (wrong param to wg.Add possible)
-	// wg := new(sync.WaitGroup)
-	// wg.Add(3)
-	// go func() {
-	// 	defer wg.Done()
-	// 	_, err = store.Upload(accountingDocumentDE, bucket, "invoiceDE", "csv", month)
-	// 	if err != nil {
-	// 		log.Println("failed to upload invoiceDE")
-	// 	}
-	// }()
-	// go func() {
-	// 	defer wg.Done()
-	// 	_, err = store.Upload(accountingDocumentDE, bucket, "invoiceDE", "csv", month)
-	// 	if err != nil {
-	// 		log.Println("failed to upload invoiceDE")
-	// 	}
-	// }()
-	// go func() {
-	// 	defer wg.Done()
-	// 	_, err = store.Upload(auditLog, bucket, "auditLog", "log", month)
-	// 	if err != nil {
-	// 		log.Println("failed to upload invoiceDE")
-	// 	}
-	// }()
-
-	// asynchronous, nice interface
-	ugroup := new(store.UploadGroup)
+	upgroup := new(store.UploadGroup)
 	errchans := []chan error{
-		ugroup.Upload(accountingDocumentDE, bucket, "invoiceDE", "csv", month),
-		ugroup.Upload(accountingDocumentEN, bucket, "invoiceEN", "csv", month),
-		ugroup.Upload(auditLog, bucket, "auditLog", "log", month),
+		upgroup.Upload(accountingDocumentDE, bucket, "invoiceDE", "csv", month),
+		upgroup.Upload(accountingDocumentEN, bucket, "invoiceEN", "csv", month),
+		upgroup.Upload(auditLog, bucket, "auditLog", "log", month),
 	}
 
-	ugroup.Wait()
-
-	for _, ec := range errchans {
-		err := <-ec
+	upgroup.Wait()
+	for _, channel := range errchans {
+		err := <-channel
 		if err != nil {
 			log.Printf("Failed to upload element: %v\n", err)
 		}
