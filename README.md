@@ -1,8 +1,8 @@
-# altemista-billing
+# Altemista/billing
 
-[![Build Status](https://travis-ci.org/Altemista/altemista-billing.svg?branch=master)](https://travis-ci.org/Altemista/altemista-billing)
+[![Build Status](https://travis-ci.org/Altemista/billing.svg?branch=master)](https://travis-ci.org/Altemista/billing)
 
-An AWS billing service for Altemista Cloud.
+The automated billing service for Altemista Cloud.
 
 Please read through [AWS Authentication and Config](#awsauthconfig) if you're running the application for the first time.
 
@@ -35,7 +35,6 @@ bucket: mybucket
 month: current
 provider: aws
 ```
-The desired subcommand can currently not be specified, and has to be passed on the command line.
 
 ## AWS Auth and Config <a name="awsauthconfig"></a>
 
