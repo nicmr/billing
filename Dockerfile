@@ -19,7 +19,6 @@ RUN adduser -D runner
 # Add AWS config to user
 COPY .aws/config /home/runner/.aws/config
 # Set variable enabling loading of the config
-ENV AWS_SDK_LOAD_CONFIG=1
 
 WORKDIR /app
 #copy binaries from build stage
