@@ -82,7 +82,7 @@ Requirements:
 
 Now you can compile the program using Go 1.12+
 ```zsh
-go run . createBill --month current --bucket <yourS3bucket>
+go run . invoice --month current --bucket <yourS3bucket>
 ```
 
 ## Testing <a name="testing"></a>
