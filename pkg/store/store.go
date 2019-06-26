@@ -15,28 +15,29 @@ import (
 var (
 	// Session is safe for concurrent use after initialization,
 	// as it will not be mutated by the SDK after creation
-	awsSess = createSessionOrFatal()
+	awsSess *session.Session
 	// Uploader is also safe for concurrent use
-	uploader = s3manager.NewUploader(awsSess)
+	uploader *s3manager.Uploader
 )
 
-func createSessionOrFatal() *(session.Session) {
-	sess, err := session.NewSession()
+func init() {
+	// initialize aws session
+	var err error
+	awsSess, err = session.NewSession(&aws.Config{
+		Region: aws.String("eu-central-1"),
+	})
 	if err != nil {
-		log.Fatal("Unable to initialize aws session: ", err)
+		log.Fatal("Unable to initialize aws session for package store", err)
 	}
-	return sess
+
+	// initialize uploader
+	uploader = s3manager.NewUploader(awsSess)
 }
 
 // UploadGroup facilitates uploading multiple files concurrently, then waiting for all of them to finish.
 // It is a safe abstraction around sync.WaitGroup
 type UploadGroup struct {
 	wg sync.WaitGroup
-}
-
-// add adds to the UploadGroup 's WaitGroup counter
-func (group *UploadGroup) add(n int) {
-	group.wg.Add(n)
 }
 
 // Wait blocks execution and waits for all Uploads of the UploadGroup to finish
@@ -48,7 +49,7 @@ func (group *UploadGroup) Wait() {
 // It returns an error channel it will write any encountered errors to.
 // If no errors are encountered, it will write nil to the channel.
 func (group *UploadGroup) Upload(contents string, bucket string, filename string, fileExtension string, month time.Time) chan error {
-	group.add(1)
+	group.wg.Add(1)
 	errchan := make(chan error, 1)
 
 	go func(ec chan error) {

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/costexplorer"
 )
@@ -13,8 +14,19 @@ import (
 var (
 	// Session is safe for concurrent use after initialization,
 	// as it will not be mutated by the SDK after creation
-	awsSess = createSessionOrFatal()
+	awsSess *session.Session
 )
+
+func init() {
+	// initialize aws session
+	var err error
+	awsSess, err = session.NewSession(&aws.Config{
+		Region: aws.String("eu-central-1"),
+	})
+	if err != nil {
+		log.Fatal("Unable to initialize aws session for package billing: ", err)
+	}
+}
 
 // costsBetweenAWS calls costexplorer after adding package-level variables as parameters,
 // then timestamps the result, generates cooresponding csv and returns it as an APICallResult
@@ -56,14 +68,6 @@ func costsMonthlyAWS(month time.Time) (apiCallResult, error) {
 	}
 
 	return result, nil
-}
-
-func createSessionOrFatal() *(session.Session) {
-	sess, err := session.NewSession()
-	if err != nil {
-		log.Fatal("Unable to initialize aws session: ", err)
-	}
-	return sess
 }
 
 // costsBetween returns the a GetCostAndUsageOutput containing the costs created between `start` and `end`.
