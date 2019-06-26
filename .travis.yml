@@ -6,7 +6,6 @@ services:
 env:
   global:
   - GO111MODULE=on
-  - AWS_SDK_LOAD_CONFIG=1
   - DOCKER_USERNAME=altemistatravis
   - DOCKER_NS=altemista
   - DOCKER_REPO=altemista-billing

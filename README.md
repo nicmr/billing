@@ -83,7 +83,6 @@ Requirements:
 
 Now you can compile the program using Go 1.12+
 ```zsh
-export AWS_SDK_LOAD_CONFIG=1 #only do this once
 go run . createBill --month current --bucket <yourS3bucket>
 ```
 
@@ -94,21 +93,5 @@ Automated testing is handled by Travis CI and can be configured in .travis.yml.
 If you want to run tests locally, run
 
 ```zsh
-export AWS_SDK_LOAD_CONFIG=1 #only do this once
 go test ./...
 ```
-
-## Debugging with VS Code <a name="debugging"></a>
-
-1. Make sure you have the official Microsoft Go extension installed and enabled in VS Code and have gone through all the required steps to compile the application manually
-
-2. To avoid having to export AWS_SDK_LOAD_CONFIG=1 from the parent process of vscode, open VSCode, hit `Ctrl + Shift + P` to open the commands palette, enter `Debug: Open launch.json` and tweak the env key accordingly:
-```json
-{
-    ...
-    "env": {"AWS_SDK_LOAD_CONFIG":"1"},
-    ...
-}
-```
-
-3. Save the file and click the debug button in VS Code
