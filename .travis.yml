@@ -4,7 +4,7 @@ go:
 services:
 - docker
 env:
-  global:x
+  global:
   - GO111MODULE=on
   - DOCKER_USERNAME=altemistatravis
   - DOCKER_NS=altemista
@@ -21,7 +21,6 @@ cache:
   - $HOME/gopath/pkg/mod
 install:
   - go mod download
-  - mkdir -p $HOME/.aws
   - docker pull $TAG_LATEST
 
 script:
