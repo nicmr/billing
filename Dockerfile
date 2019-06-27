@@ -16,8 +16,6 @@ FROM alpine
 RUN apk add ca-certificates
 # Create non-root user
 RUN adduser -D runner
-# Add AWS config to user
-COPY .aws/config /home/runner/.aws/config
 # Set variable enabling loading of the config
 
 WORKDIR /app

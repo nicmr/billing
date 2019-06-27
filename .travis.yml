@@ -21,8 +21,6 @@ cache:
   - $HOME/gopath/pkg/mod
 install:
   - go mod download
-  - mkdir -p $HOME/.aws
-  - cp .aws/config $HOME/.aws/config
   - docker pull $TAG_LATEST
 
 script:
