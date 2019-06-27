@@ -38,13 +38,7 @@ provider: aws
 
 ## AWS Auth and Config <a name="awsauthconfig"></a>
 
-The Application will look for `~/.aws/config` and `~/.aws/credentials` on your machine.
-
-You can copy the default config included in this repository, and adapt it to your needs.
-```shell
-cp -r ./.aws/config ~/.aws/config
-```
-
+The Application will look for and `~/.aws/credentials` on your machine.
 
 You will have to provide your own credentials file or use IAM Roles / Environment variables. You can read more about it here:
 [AWS - Configuring sdk](https://docs.aws.amazon.com/de_de/sdk-for-go/v1/developer-guide/configuring-sdk.html)
