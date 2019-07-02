@@ -18,24 +18,13 @@ Available Commands:
   invoice     Analyzes costs and creates billing documents for a single month
 
 Flags:
-      --config string   supplies the application with the specified config file
   -h, --help            help for altemista-billing
 
 Use "altemista-billing [command] --help" for more information about a command.
 ```
 Run `altemista-billing help <sub-command>` for flags and detailed information for each subcommand
 
-## Config file
-The configuration of the application can be changed with a config file.
-The application will search for a `config.yaml` in the working directory.
-
-All possible command line flags are valid keys:
-```
-bucket: mybucket
-month: current
-provider: aws
-```
-
+s
 ## AWS Auth and Config <a name="awsauthconfig"></a>
 
 The Application will look for `~/.aws/credentials` on your machine.

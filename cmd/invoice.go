@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/Altemista/altemista-billing/pkg/billing"
 	"github.com/Altemista/altemista-billing/pkg/cmd"
@@ -32,46 +31,32 @@ func init() {
 
 	// month flag & config
 	invoiceCmd.Flags().StringVarP(&month, "month", "m", "current", "Specifies the month: current, last, or 'YYYY-MM'")
-	if err := viper.BindPFlag("month", invoiceCmd.Flags().Lookup("month")); err != nil {
-		log.Fatal("Unable to bind viper to flag:", err)
-	}
 
 	// provider flag & config
 	invoiceCmd.Flags().StringVar(&provider, "provider", "aws", "Specifies the API to work with: aws, azure or onpremise")
-	if err := viper.BindPFlag("provider", invoiceCmd.Flags().Lookup("provider")); err != nil {
-		log.Fatal("Unable to bind viper to flag:", err)
-	}
 
 	// bucket flag & config
 	invoiceCmd.Flags().StringVarP(&bucket, "bucket", "b", "", "S3 bucket for output documents (required) ")
-	if err := viper.BindPFlag("bucket", invoiceCmd.Flags().Lookup("bucket")); err != nil {
-		log.Fatal("Unable to bind viper to flag:", err)
-	}
+	invoiceCmd.MarkFlagRequired("bucket")
 
 	// margin flag & config
 	invoiceCmd.Flags().Float64Var(&margin, "margin", 0.00, "The relative margin that should be added on top of resource costs as ops compensation")
-	if err := viper.BindPFlag("margin", invoiceCmd.Flags().Lookup("margin")); err != nil {
-		log.Fatal("Unable to bind viper to flag:", err)
-	}
 
 	rootCmd.AddCommand(invoiceCmd)
 }
 
 func invoice() {
 	// Get bucket parameter
-	bucket := viper.GetString("bucket")
+
 	if bucket == "" {
 		log.Fatal("Required --bucket parameter missing. Please supply it via flag or config file.")
 	}
 
 	// Select appropriate API
-	costProvider := parseCostProvider(viper.GetString("provider"))
-
-	// Retrieve the margin parameter
-	margin := viper.GetFloat64("margin")
+	parsedProvider := parseCostProvider(provider)
 
 	// Validate the month tring by parsing into time.Time struct
-	parsedMonth, err := parseMonth(viper.GetString("month"))
+	parsedMonth, err := parseMonth(month)
 	if err != nil {
 		log.Println("Error parsing passed month argument")
 		// 22 signifies invalid argument
@@ -79,7 +64,7 @@ func invoice() {
 	}
 
 	// Flag and arg parsing complete, pass to application code
-	err = cmd.Run(costProvider, parsedMonth, margin, bucket)
+	err = cmd.Run(parsedProvider, parsedMonth, margin, bucket)
 	if err != nil {
 		log.Fatal(err)
 	}
