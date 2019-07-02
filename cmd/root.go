@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -22,34 +21,9 @@ var (
 
 // Execute lets the cobra root Command parse the subcommands and params
 func Execute() {
-	cobra.OnInitialize(initConfig)
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "supplies the application with the specified config file")
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
-	}
-
-}
-
-func initConfig() {
-
-	if cfgFile != "" {
-		// Load the specified config
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// look for config file in working directory
-		viper.SetConfigType("yaml")
-		viper.SetConfigName("config")
-		viper.AddConfigPath(".")
-	}
-
-	viper.AutomaticEnv()
-
-	if err := viper.ReadInConfig(); err != nil {
-		if cfgFile != "" {
-			log.Println("No config file or unable to read it, using defaults")
-		}
 	}
 
 }
