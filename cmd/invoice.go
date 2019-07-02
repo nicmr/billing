@@ -64,7 +64,7 @@ func invoice() {
 	}
 
 	// Flag and arg parsing complete, pass to application code
-	err = cmd.Run(parsedProvider, parsedMonth, margin, bucket)
+	err = cmd.Invoice(parsedProvider, parsedMonth, margin, bucket)
 	if err != nil {
 		log.Fatal(err)
 	}
