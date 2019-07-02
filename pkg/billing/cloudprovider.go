@@ -1,15 +1,14 @@
 package billing
 
 // This  file contains functions around the exported types of the billing package:
-// CloudProvider and APICALL
+// CloudProvider and APICall
 
 import (
 	"time"
 )
 
-// APICall is a type representing a function that takes a time.Time and returns the AWS costs
-// for the month associated with that time.Time
-// and returns an APICallResult containing the response from the implemented API
+// APICall is a type representing a function that takes a time.Time and returns the and returns an APICallResult containing
+// the costs for the month associated with that time.Time.
 type APICall func(time.Time) (apiCallResult, error)
 
 // CloudProvider wraps the function required to retrieve billing data from a CloudProvider, such as AWS or Azure
@@ -23,17 +22,17 @@ func Default() CloudProvider {
 	return AWS()
 }
 
-// AWS returns a CloudProvider struct to be passed to CostCalc for cost calculation with the AWS Cost Explorer API
+// AWS returns a CloudProvider struct that implements an APICall  the AWS Cost Explorer API
 func AWS() CloudProvider {
 	return CloudProvider{apicall: costsMonthlyAWS, name: "AWS"}
 }
 
-// Azure returns a CloudProvider struct to be passed to CostCalc for cost calculation with the Azure Cost Explorer API
+// Azure returns a CloudProvider struct  the Azure Cost Explorer API
 func Azure() CloudProvider {
 	return CloudProvider{apicall: costsMonthlyAzure, name: "Azure"}
 }
 
-// OnPremise returns a CloudProvider struct to be passed to CostCalc for cost calculation with an on-premise solution
+// OnPremise returns a CloudProvider struct implements an APICall for an Altemista on-premise solution
 func OnPremise() CloudProvider {
 	return CloudProvider{apicall: costsMonthlyOnPremise, name: "OnPremise"}
 }
