@@ -1,4 +1,4 @@
-// Package documents provides functionality to create documents from billing data
+// Package documents creates documents from billing data
 package documents
 
 import (
@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// ChargeBack contains all information about a set of chargebacks required by the functions of this package
+// ChargeBack contains all information about a set of chargebacks required by the functions of this package.
 type ChargeBack struct {
 	month                     time.Time
 	bills                     []Bill
@@ -20,7 +20,7 @@ type ChargeBack struct {
 	providerResponseTimeStamp time.Time
 }
 
-// Bill represents a bill for a single project and its associated costs for a single month
+// Bill represents a bill for a single project and its associated costs for a single month.
 type Bill struct {
 	ProjectName   string
 	ProjectID     string
@@ -29,8 +29,8 @@ type Bill struct {
 	Currency      string
 }
 
-// NewChargeBack returns a ChargeBack to be passed to the Different methods of the package
-// This is the preferred method of instantiating a struct of this type
+// NewChargeBack returns a ChargeBack to be passed to the Different methods of the package.
+// This is the preferred method of instantiating a struct of this type.
 func NewChargeBack(bills []Bill, margin float64, month time.Time, providerResponse string, providerResponseTimeStamp time.Time) ChargeBack {
 	return ChargeBack{
 		bills:                     bills,
@@ -41,8 +41,8 @@ func NewChargeBack(bills []Bill, margin float64, month time.Time, providerRespon
 	}
 }
 
-// NewBill returns a new Bill struct with all necessary fields set
-// This is the preferred method of instantiating a struct of this type
+// NewBill returns a new Bill struct with all necessary fields set.
+// This is the preferred method of instantiating a struct of this type.
 func NewBill(projectname string, projectID string, contactPerson string, amount float64, currency string) Bill {
 	return Bill{
 		ProjectName:   projectname,
@@ -63,7 +63,7 @@ func GenerateAuditLog(chargeback ChargeBack) string {
 	return fmt.Sprintf("Audit log generated on: %v\nCloud provider: %v\n%v", timestamp, chargeback.provider, chargeback.providerResponse)
 }
 
-// GenerateAccountingDocumentWithLocale generates a document for accounting
+// GenerateAccountingDocumentWithLocale generates a document for accounting.
 // Currently, this is a .csv document.
 // CSV can to be adapted for different locales to work with different Microsoft Excel locales.
 func GenerateAccountingDocumentWithLocale(chargeback ChargeBack, locale string) string {
@@ -131,7 +131,7 @@ func formatRow(position int, month time.Time, projectName string, projectID stri
 
 // formatFloatWithLocale formats the passed float for use with the passed locale string.
 // currentyl supported locale strings are as follows:
-// - "DE" for decimal comma
+// - "DE" for decimal comma .
 // All locales not presest on the list above will apply the default formatting, using a decimal point
 func formatFloatWithLocale(value float64, locale string) string {
 	locale = strings.ToUpper(locale)

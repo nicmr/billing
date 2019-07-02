@@ -10,7 +10,7 @@ import (
 	"github.com/Altemista/altemista-billing/pkg/store"
 )
 
-// Invoice executes the application code of altemista billing for the invoice subcommand
+// Invoice executes the application code of altemista billing for the invoice subcommand.
 func Invoice(provider billing.CloudProvider, month time.Time, margin float64, bucket string) error {
 
 	// Call the desired API

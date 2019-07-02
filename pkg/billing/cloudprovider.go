@@ -1,6 +1,6 @@
 package billing
 
-// This  file contains functions around the exported types of the billing package:
+// This file contains functions around the exported types of the billing package:
 // CloudProvider and APICall
 
 import (
@@ -37,11 +37,10 @@ func OnPremise() CloudProvider {
 	return CloudProvider{apicall: costsMonthlyOnPremise, name: "OnPremise"}
 }
 
-// apiCallResult contains a Timestamp and ResponseString
+// apiCallResult contains a Timestamp and ResponseString.
 // Timestamp is a time.Time of the moment the query was completed.
-// ResponseString is a string representation for an arbitrary costexplorer query response
-// CsvFileContent is a string with a csv representation of the most important data returned ny the ApiCall
-// This struct is likely to change a lot during development, so don't rely too much on its internals.
+// the Response string is the exact response received from the apiCall.
+// Entries is a parsed Representation of the individual entries of the reply.
 type apiCallResult struct {
 	Timestamp      time.Time
 	ResponseString string
