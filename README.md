@@ -1,6 +1,7 @@
 # Altemista/billing
 
 [![Build Status](https://travis-ci.org/Altemista/billing.svg?branch=master)](https://travis-ci.org/Altemista/billing)
+[![GoDoc](https://godoc.org/github.com/Altemista/altemista-billing?status.svg)](https://godoc.org/github.com/Altemista/altemista-billing)
 
 The automated billing service for Altemista Cloud.
 
