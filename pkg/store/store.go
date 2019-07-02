@@ -1,3 +1,4 @@
+// Package store provides functions to arbitrary file contents on AWS S3
 package store
 
 import (
