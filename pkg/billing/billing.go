@@ -8,7 +8,7 @@ import (
 	"github.com/Altemista/altemista-billing/pkg/documents"
 )
 
-// CalculateChargeBack calculates the costs in the passed month at the specified provider and calculates the total cost with the specified margin.
+// CalculateChargeBack calculates the costs in the passed month at the specified provider and applies the specified price margin.
 func CalculateChargeBack(provider CloudProvider, month time.Time, margin float64) (documents.ChargeBack, error) {
 
 	apiresult, err := provider.apicall(month)

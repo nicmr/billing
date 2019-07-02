@@ -28,7 +28,7 @@ func init() {
 	}
 }
 
-// costsBetweenAWS calls costexplorer after adding package-level variables as parameters,
+// costsMonthlyAWS is a wrapper around costexplorerCall, translates the month into month boundaries,
 // then timestamps the result, generates cooresponding csv and returns it as an APICallResult
 func costsMonthlyAWS(month time.Time) (apiCallResult, error) {
 

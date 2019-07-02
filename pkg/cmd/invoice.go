@@ -10,8 +10,8 @@ import (
 	"github.com/Altemista/altemista-billing/pkg/store"
 )
 
-// Run executes the application code of altemista billing
-func Run(provider billing.CloudProvider, month time.Time, margin float64, bucket string) error {
+// Invoice executes the application code of altemista billing for the invoice subcommand.
+func Invoice(provider billing.CloudProvider, month time.Time, margin float64, bucket string) error {
 
 	// Call the desired API
 	chargeBack, err := billing.CalculateChargeBack(provider, month, margin)
