@@ -1,28 +1,28 @@
 package billing
 
 // This file contains functions around the exported types of the billing package:
-// CloudProvider and APICall
+// CloudProvider and apiCall
 
 import (
 	"time"
 )
 
-// APICall is a type representing a function that takes a time.Time and returns the and returns an APICallResult containing
+// apiCall is a type representing a function that takes a time.Time and returns the and returns an APICallResult containing
 // the costs for the month associated with that time.Time.
-type APICall func(time.Time) (apiCallResult, error)
+type apiCall func(time.Time) (apiCallResult, error)
 
 // CloudProvider wraps the function required to retrieve billing data from a CloudProvider, such as AWS or Azure
 type CloudProvider struct {
-	apicall APICall
+	apicall apiCall
 	name    string
 }
 
-// Default returns a default `APICall`, currently AWS
+// Default returns a default `apiCall`, currently AWS
 func Default() CloudProvider {
 	return AWS()
 }
 
-// AWS returns a CloudProvider struct that implements an APICall  the AWS Cost Explorer API
+// AWS returns a CloudProvider struct that implements an apiCall  the AWS Cost Explorer API
 func AWS() CloudProvider {
 	return CloudProvider{apicall: costsMonthlyAWS, name: "AWS"}
 }
@@ -32,7 +32,7 @@ func Azure() CloudProvider {
 	return CloudProvider{apicall: costsMonthlyAzure, name: "Azure"}
 }
 
-// OnPremise returns a CloudProvider struct implements an APICall for an Altemista on-premise solution
+// OnPremise returns a CloudProvider struct implements an apiCall for an Altemista on-premise solution
 func OnPremise() CloudProvider {
 	return CloudProvider{apicall: costsMonthlyOnPremise, name: "OnPremise"}
 }
@@ -47,7 +47,7 @@ type apiCallResult struct {
 	Entries        []apiCallResultEntry
 }
 
-// apiCallResultEntry is a struct that holds the relevant returned information of a single entry returned by an APICall
+// apiCallResultEntry is a struct that holds the relevant returned information of a single entry returned by an apiCall
 type apiCallResultEntry struct {
 	ProjectID string
 	Amount    float64
