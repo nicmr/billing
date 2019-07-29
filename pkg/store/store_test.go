@@ -2,7 +2,6 @@ package store
 
 import (
 	"log"
-	"os"
 	"testing"
 	"time"
 
@@ -10,10 +9,6 @@ import (
 )
 
 func TestUpload(t *testing.T) {
-	if _, exists := os.LookupEnv("AWS_SDK_LOAD_CONFIG=1"); !exists {
-		t.Skip("Tried to test uploading to S3, but no valid AWS config found. Test skipped.")
-	}
-
 	_, err := Upload("test", "altemista-billing-travis", "test/invoice", ".csv", time.Now())
 	if err != nil {
 		log.Println("Writing to s3 failed: ", err)

@@ -26,22 +26,29 @@ func Invoice(provider billing.CloudProvider, month time.Time, margin float64, bu
 
 	// Upload to S3
 	upgroup := new(store.UploadGroup)
-	errchans := []chan error{
-		upgroup.Upload(accountingDocumentDE, bucket, "invoiceDE", "csv", month),
-		upgroup.Upload(accountingDocumentEN, bucket, "invoiceEN", "csv", month),
-		upgroup.Upload(auditLog, bucket, "auditLog", "log", month),
-	}
+
+	upgroup.Upload(accountingDocumentDE, bucket, "invoiceDE", month)
+	upgroup.Upload(accountingDocumentEN, bucket, "invoiceEN", month)
+	upgroup.Upload(auditLog, bucket, "auditLog", month)
 
 	upgroup.Wait()
-	for _, channel := range errchans {
-		err := <-channel
+
+	for _, out := range upgroup.Outputs {
+		err := <-out.Err
 		if err != nil {
 			log.Printf("Failed to upload element: %v\n", err)
+		} else {
+			s3output := <-out.S3Output
+			if s3output == nil {
+				log.Println("Output of S3 was nil, can't display upload information")
+			} else {
+				log.Printf("Uploaded as %v\n", s3output.Location)
+			}
 		}
 	}
 
 	// Print generated accountingDocument to stdout
-	log.Println("generated doc:\n" + accountingDocumentEN)
+	log.Println("generated Document:\n" + accountingDocumentEN)
 
 	return nil
 }
