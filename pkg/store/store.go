@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -76,11 +78,21 @@ func (group *UploadGroup) Upload(contents string, bucket string, filename string
 }
 
 // LocalFile creates a local file with the specified content, using the same naming scheme as the Uploads to S3
-func LocalFile(contents string, dirPath string, filename string, month time.Time) error {
+// Uses the bucket parameter to create a new local directory
+func LocalFile(contents string, bucket string, filename string, month time.Time) error {
 	filenameKeyScheme := s3KeyScheme(month, filename)
+	fullPath := bucket + "/" + filenameKeyScheme
+	dir := filepath.Dir(fullPath)
 
-	err := ioutil.WriteFile(dirPath+filenameKeyScheme, []byte(contents), 0644)
-	if err != nil {
+	// Create directory if it doesn't exist yet
+	err := os.MkdirAll(dir, 0755)
+	if err == nil || os.IsExist(err) {
+		// proceed as usual if the error indicates the dir already exists
+		err := ioutil.WriteFile(fullPath, []byte(contents), 0644)
+		if err != nil {
+			return err
+		}
+	} else {
 		return err
 	}
 	return nil

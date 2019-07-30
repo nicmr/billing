@@ -11,7 +11,7 @@ import (
 )
 
 // Invoice executes the application code of altemista billing for the invoice subcommand.
-func Invoice(provider billing.CloudProvider, month time.Time, margin float64, bucket string) error {
+func Invoice(provider billing.CloudProvider, month time.Time, margin float64, bucket string, local bool) error {
 
 	// Call the desired API
 	chargeBack, err := billing.CalculateChargeBack(provider, month, margin)
@@ -23,6 +23,23 @@ func Invoice(provider billing.CloudProvider, month time.Time, margin float64, bu
 	accountingDocumentEN := documents.GenerateAccountingDocumentWithLocale(chargeBack, "EN")
 	accountingDocumentDE := documents.GenerateAccountingDocumentWithLocale(chargeBack, "DE")
 	auditLog := documents.GenerateAuditLog(chargeBack)
+
+	// Check if override to save to local disk is set, otherwise continue as usual
+	if local {
+		errors := []error{nil, nil, nil}
+		errors[0] = store.LocalFile(accountingDocumentDE, bucket, "invoiceDE", month)
+		errors[1] = store.LocalFile(accountingDocumentEN, bucket, "invoiceEN", month)
+		errors[2] = store.LocalFile(auditLog, bucket, "auditLog", month)
+		for i, err := range errors {
+			if err != nil {
+				log.Printf("Failed to save file %v/%v to local disk:%v\n", i+1, len(errors), err)
+			} else {
+				log.Printf("Successfully saved file %v/%v to local disk\n", i+1, len(errors))
+			}
+		}
+		log.Println("Files can be found in folder named:", bucket)
+		return nil
+	}
 
 	// Upload to S3
 	upgroup := new(store.UploadGroup)
@@ -40,7 +57,7 @@ func Invoice(provider billing.CloudProvider, month time.Time, margin float64, bu
 		} else {
 			s3output := <-out.S3Output
 			if s3output == nil {
-				log.Println("Output of S3 was nil, can't display upload information")
+				log.Println("Output of S3 was nil, can't display upload location")
 			} else {
 				log.Printf("Uploaded as %v\n", s3output.Location)
 			}
