@@ -4,9 +4,25 @@ import (
 	"log"
 	"testing"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws/credentials"
 )
 
 func TestAWS(t *testing.T) {
+	// no parameters will look for credentials file at awscli default location
+	credsFile := credentials.NewSharedCredentials("", "")
+	credsEnv := credentials.NewEnvCredentials()
+	if credsFile == nil || credsEnv == nil {
+		log.Println("AWS unexpectedly returned a nil pointer")
+		t.SkipNow()
+	}
+	_, errFileCreds := credsFile.Get()
+	_, errCredsEnv := credsEnv.Get()
+	if errFileCreds != nil && errCredsEnv != nil {
+		log.Println("Skipping Test because Creds could be retrieved neither from file or env.")
+		t.SkipNow()
+	}
+
 	const iso8601 = "2006-01-02"
 	provider := AWS()
 	month := "2019-04-01"
