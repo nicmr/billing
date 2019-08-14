@@ -11,6 +11,7 @@ import (
 )
 
 func TestUpload(t *testing.T) {
+	
 	// no parameters will look for credentials file at awscli default location
 	credsFile := credentials.NewSharedCredentials("", "")
 	credsEnv := credentials.NewEnvCredentials()
@@ -25,7 +26,7 @@ func TestUpload(t *testing.T) {
 		t.SkipNow()
 	}
 
-	_, err := Upload("test", "altemista-billing-travis", "test/invoice", ".csv", time.Now())
+	_, err := Upload("test", "altemista-billing-travis", "test/invoice", time.Now())
 	if err != nil {
 		log.Println("Writing to s3 failed: ", err)
 		t.FailNow()

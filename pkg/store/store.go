@@ -3,7 +3,10 @@ package store
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -38,7 +41,15 @@ func init() {
 // UploadGroup facilitates uploading multiple files concurrently, then waiting for all of them to finish.
 // It is a safe abstraction around sync.WaitGroup
 type UploadGroup struct {
-	wg sync.WaitGroup
+	wg      sync.WaitGroup
+	Outputs []UploadResult
+}
+
+// UploadResult contains information about the success and metadata
+// about an single upload in an UploadGroup
+type UploadResult struct {
+	S3Output chan *s3manager.UploadOutput
+	Err      chan error
 }
 
 // Wait blocks execution and waits for all Uploads of the UploadGroup to finish
@@ -49,22 +60,47 @@ func (group *UploadGroup) Wait() {
 // Upload starts a new file upload goroutine for the UploadGroup with the specified parameters
 // It returns an error channel it will write any encountered errors to.
 // If no errors are encountered, it will write nil to the channel.
-func (group *UploadGroup) Upload(contents string, bucket string, filename string, fileExtension string, month time.Time) chan error {
+func (group *UploadGroup) Upload(contents string, bucket string, filename string, month time.Time) {
 	group.wg.Add(1)
-	errchan := make(chan error, 1)
+	uploadResult := UploadResult{
+		make(chan *s3manager.UploadOutput, 1),
+		make(chan error, 1),
+	}
 
-	go func(ec chan error) {
+	go func(outc chan *s3manager.UploadOutput, ec chan error) {
 		defer group.wg.Done()
-		_, err := Upload(contents, bucket, filename, fileExtension, month)
+		output, err := Upload(contents, bucket, filename, month)
 		ec <- err
-	}(errchan)
+		outc <- output
+	}(uploadResult.S3Output, uploadResult.Err)
 
-	return errchan
+	group.Outputs = append(group.Outputs, uploadResult)
+}
+
+// LocalFile creates a local file with the specified content, using the same naming scheme as the Uploads to S3
+// Uses the bucket parameter to create a new local directory
+func LocalFile(contents string, bucket string, filename string, month time.Time) error {
+	filenameKeyScheme := s3KeyScheme(month, filename)
+	fullPath := bucket + "/" + filenameKeyScheme
+	dir := filepath.Dir(fullPath)
+
+	// Create directory if it doesn't exist yet
+	err := os.MkdirAll(dir, 0755)
+	if err == nil || os.IsExist(err) {
+		// proceed as usual if the error indicates the dir already exists
+		err := ioutil.WriteFile(fullPath, []byte(contents), 0644)
+		if err != nil {
+			return err
+		}
+	} else {
+		return err
+	}
+	return nil
 }
 
 // Upload uploads bytes from `reader` to S3 bucket `bucket`.
 // The created objects name will be created according to store.s3KeyScheme
-func Upload(contents string, bucket string, filename string, fileExtension string, month time.Time) (*(s3manager.UploadOutput), error) {
+func Upload(contents string, bucket string, filename string, month time.Time) (*(s3manager.UploadOutput), error) {
 
 	reader := strings.NewReader(contents)
 
@@ -79,9 +115,6 @@ func Upload(contents string, bucket string, filename string, fileExtension strin
 	if err != nil {
 		return nil, fmt.Errorf("failed to upload file, %v", err)
 	}
-
-	log.Println("Uploaded as fileName: ", key)
-
 	return result, nil
 }
 

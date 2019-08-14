@@ -16,6 +16,7 @@ var (
 	provider string
 	bucket   string
 	margin   float64
+	local    bool
 	// invoiceCmd represents the createBill command
 	invoiceCmd = &cobra.Command{
 		Use:   "invoice",
@@ -29,17 +30,15 @@ var (
 
 func init() {
 
-	// month flag & config
 	invoiceCmd.Flags().StringVarP(&month, "month", "m", "current", "Specifies the month: current, last, or 'YYYY-MM'")
 
-	// provider flag & config
 	invoiceCmd.Flags().StringVar(&provider, "provider", "aws", "Specifies the API to work with: aws, azure or onpremise")
 
-	// bucket flag & config
 	invoiceCmd.Flags().StringVarP(&bucket, "bucket", "b", "", "S3 bucket for output documents (required) ")
 	invoiceCmd.MarkFlagRequired("bucket")
 
-	// margin flag & config
+	invoiceCmd.Flags().BoolVarP(&local, "local", "l", false, "Saves files to local disk instead of uploading to S3. Overrides bucket param.")
+
 	invoiceCmd.Flags().Float64Var(&margin, "margin", 0.00, "The relative margin that should be added on top of resource costs as ops compensation")
 
 	rootCmd.AddCommand(invoiceCmd)
@@ -64,7 +63,7 @@ func invoice() {
 	}
 
 	// Flag and arg parsing complete, pass to application code
-	err = cmd.Invoice(parsedProvider, parsedMonth, margin, bucket)
+	err = cmd.Invoice(parsedProvider, parsedMonth, margin, bucket, local)
 	if err != nil {
 		log.Fatal(err)
 	}
