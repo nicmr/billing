@@ -5,10 +5,27 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws/credentials"
+
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestUpload(t *testing.T) {
+	
+	// no parameters will look for credentials file at awscli default location
+	credsFile := credentials.NewSharedCredentials("", "")
+	credsEnv := credentials.NewEnvCredentials()
+	if credsFile == nil || credsEnv == nil {
+		log.Println("AWS unexpectedly returned a nil pointer")
+		t.SkipNow()
+	}
+	_, errFileCreds := credsFile.Get()
+	_, errCredsEnv := credsEnv.Get()
+	if errFileCreds != nil && errCredsEnv != nil {
+		log.Println("Skipping Test because Creds could be retrieved neither from file or env.")
+		t.SkipNow()
+	}
+
 	_, err := Upload("test", "altemista-billing-travis", "test/invoice", time.Now())
 	if err != nil {
 		log.Println("Writing to s3 failed: ", err)
